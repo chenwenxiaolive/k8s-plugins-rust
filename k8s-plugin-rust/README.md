@@ -18,7 +18,7 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 ├─────────────────────────────────────────────────────────────────┤
 │  Total Go Test Files:                              73           │
 │  Test Files Migrated:                              36           │
-│  Tests Passing:                                    177          │
+│  Tests Passing:                                    201          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -138,15 +138,42 @@ k8s-plugin-rust/
     │       └── mod.rs
     └── plugins/
         ├── mod.rs
-        ├── admit/mod.rs               # ✅
-        ├── alwayspullimages/mod.rs    # ✅
-        ├── antiaffinity/mod.rs        # ✅
-        ├── autoprovision/mod.rs       # ✅
-        ├── defaulttolerationseconds/mod.rs  # ✅
-        ├── deny/mod.rs                # ✅
-        ├── exists/mod.rs              # ✅
-        ├── extendedresourcetoleration/mod.rs  # ✅
-        └── nodetaint/mod.rs           # ✅
+        ├── admit/mod.rs                      # ✅ AlwaysAdmit
+        ├── alwayspullimages/mod.rs           # ✅ AlwaysPullImages
+        ├── antiaffinity/mod.rs               # ✅ LimitPodHardAntiAffinityTopology
+        ├── autoprovision/mod.rs              # ✅ NamespaceAutoProvision
+        ├── certapproval/mod.rs               # ✅ CertificateApproval
+        ├── certsigning/mod.rs                # ✅ CertificateSigning
+        ├── certsubjectrestriction/mod.rs     # ✅ CertificateSubjectRestriction
+        ├── ctbattest/mod.rs                  # ✅ ClusterTrustBundleAttest
+        ├── defaultingressclass/mod.rs        # ✅ DefaultIngressClass
+        ├── defaulttolerationseconds/mod.rs   # ✅ DefaultTolerationSeconds
+        ├── deny/mod.rs                       # ✅ AlwaysDeny
+        ├── denyserviceexternalips/mod.rs     # ✅ DenyServiceExternalIPs
+        ├── eventratelimit/mod.rs             # ✅ EventRateLimit
+        ├── exists/mod.rs                     # ✅ NamespaceExists
+        ├── extendedresourcetoleration/mod.rs # ✅ ExtendedResourceToleration
+        ├── gc/mod.rs                         # ✅ OwnerReferencesPermissionEnforcement
+        ├── imagepolicy/mod.rs                # ✅ ImagePolicyWebhook
+        ├── lifecycle/mod.rs                  # ✅ NamespaceLifecycle
+        ├── limitranger/mod.rs                # ✅ LimitRanger
+        ├── mutatingadmissionpolicy/mod.rs    # ✅ MutatingAdmissionPolicy
+        ├── mutatingwebhook/mod.rs            # ✅ MutatingAdmissionWebhook
+        ├── noderestriction/mod.rs            # ✅ NodeRestriction
+        ├── nodetaint/mod.rs                  # ✅ TaintNodesByCondition
+        ├── podnodeselector/mod.rs            # ✅ PodNodeSelector
+        ├── podpriority/mod.rs                # ✅ Priority
+        ├── podsecurity/mod.rs                # ✅ PodSecurity
+        ├── podtolerationrestriction/mod.rs   # ✅ PodTolerationRestriction
+        ├── podtopologylabels/mod.rs          # ✅ PodTopologyLabels
+        ├── resize/mod.rs                     # ✅ PersistentVolumeClaimResize
+        ├── resourcequota/mod.rs              # ✅ ResourceQuota
+        ├── runtimeclass/mod.rs               # ✅ RuntimeClass
+        ├── serviceaccount/mod.rs             # ✅ ServiceAccount
+        ├── setdefault/mod.rs                 # ✅ DefaultStorageClass
+        ├── storageobjectinuseprotection/mod.rs # ✅ StorageObjectInUseProtection
+        ├── validatingadmissionpolicy/mod.rs  # ✅ ValidatingAdmissionPolicy
+        └── validatingwebhook/mod.rs          # ✅ ValidatingAdmissionWebhook
 ```
 
 ## Implemented API Types
