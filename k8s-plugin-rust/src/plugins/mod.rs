@@ -18,17 +18,38 @@ pub mod admit;
 pub mod alwayspullimages;
 pub mod antiaffinity;
 pub mod autoprovision;
+pub mod certapproval;
+pub mod certsigning;
 pub mod certsubjectrestriction;
+pub mod ctbattest;
+pub mod defaultingressclass;
 pub mod defaulttolerationseconds;
 pub mod deny;
 pub mod denyserviceexternalips;
+pub mod eventratelimit;
 pub mod exists;
 pub mod extendedresourcetoleration;
+pub mod gc;
+pub mod imagepolicy;
 pub mod lifecycle;
 pub mod limitranger;
+pub mod mutatingadmissionpolicy;
+pub mod mutatingwebhook;
 pub mod nodetaint;
+pub mod noderestriction;
 pub mod podnodeselector;
 pub mod podpriority;
+pub mod podsecurity;
+pub mod podtolerationrestriction;
+pub mod podtopologylabels;
+pub mod resize;
+pub mod resourcequota;
+pub mod runtimeclass;
+pub mod serviceaccount;
+pub mod setdefault;
+pub mod storageobjectinuseprotection;
+pub mod validatingadmissionpolicy;
+pub mod validatingwebhook;
 
 use crate::admission::Plugins;
 
@@ -116,18 +137,38 @@ pub fn register_all_admission_plugins(plugins: &Plugins) {
     alwayspullimages::register(plugins);
     antiaffinity::register(plugins);
     autoprovision::register(plugins);
+    certapproval::register(plugins);
+    certsigning::register(plugins);
     certsubjectrestriction::register(plugins);
+    ctbattest::register(plugins);
+    defaultingressclass::register(plugins);
     defaulttolerationseconds::register(plugins);
     deny::register(plugins);
     denyserviceexternalips::register(plugins);
+    eventratelimit::register(plugins);
     exists::register(plugins);
     extendedresourcetoleration::register(plugins);
+    gc::register(plugins);
+    imagepolicy::register(plugins);
     lifecycle::register(plugins);
     limitranger::register(plugins);
+    mutatingadmissionpolicy::register(plugins);
+    mutatingwebhook::register(plugins);
     nodetaint::register(plugins);
+    noderestriction::register(plugins);
     podnodeselector::register(plugins);
     podpriority::register(plugins);
-    // TODO: Register remaining plugins as they are implemented
+    podsecurity::register(plugins);
+    podtolerationrestriction::register(plugins);
+    podtopologylabels::register(plugins);
+    resize::register(plugins);
+    resourcequota::register(plugins);
+    runtimeclass::register(plugins);
+    serviceaccount::register(plugins);
+    setdefault::register(plugins);
+    storageobjectinuseprotection::register(plugins);
+    validatingadmissionpolicy::register(plugins);
+    validatingwebhook::register(plugins);
 }
 
 #[cfg(test)]
