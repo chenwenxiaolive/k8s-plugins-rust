@@ -871,6 +871,7 @@ mod tests {
                 priority_class_name: String::new(),
                 priority: None,
                 preemption_policy: None,
+                ..Default::default()
             },
         }
     }
@@ -1016,6 +1017,7 @@ mod tests {
                 priority_class_name: String::new(),
                 priority: None,
                 preemption_policy: None,
+                ..Default::default()
             },
         };
 
@@ -1053,6 +1055,7 @@ mod tests {
                 priority_class_name: String::new(),
                 priority: None,
                 preemption_policy: None,
+                ..Default::default()
             },
         };
 
@@ -1091,6 +1094,7 @@ mod tests {
                 priority_class_name: String::new(),
                 priority: None,
                 preemption_policy: None,
+                ..Default::default()
             },
         };
 
@@ -1130,6 +1134,7 @@ mod tests {
                 priority_class_name: String::new(),
                 priority: None,
                 preemption_policy: None,
+                ..Default::default()
             },
         };
 
@@ -1522,6 +1527,7 @@ defaultAllow: true
                 priority_class_name: String::new(),
                 priority: None,
                 preemption_policy: None,
+                ..Default::default()
             },
         };
 
@@ -1602,6 +1608,7 @@ defaultAllow: true
                 priority_class_name: String::new(),
                 priority: None,
                 preemption_policy: None,
+                ..Default::default()
             },
         };
 

@@ -608,6 +608,7 @@ mod tests {
                 image: format!("foo:V{}", i),
                 image_pull_policy: crate::api::core::PullPolicy::IfNotPresent,
                 resources: resources.clone(),
+                security_context: None,
             })
             .collect();
 

@@ -266,7 +266,7 @@ mod tests {
             node_name: None,
             name: "123".to_string(),
             namespace: "test".to_string(),
-            spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
+            spec: PodSpec {
                 init_containers: vec![
                     Container::new("init1", "image"),
                     Container::with_pull_policy("init2", "image", PullPolicy::Never),
@@ -279,7 +279,6 @@ mod tests {
                     Container::with_pull_policy("ctr3", "image", PullPolicy::IfNotPresent),
                     Container::with_pull_policy("ctr4", "image", PullPolicy::Always),
                 ],
-                ephemeral_containers: vec![],
                 volumes: vec![
                     Volume::new_image(
                         "volume1",
@@ -294,6 +293,7 @@ mod tests {
                         ImageVolumeSource::new("image", PullPolicy::Always),
                     ),
                 ],
+                ..Default::default()
             },
         };
 
@@ -344,7 +344,7 @@ mod tests {
             node_name: None,
             name: "123".to_string(),
             namespace: "test".to_string(),
-            spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
+            spec: PodSpec {
                 init_containers: vec![
                     Container::new("init1", "image"), // Empty policy
                     Container::with_pull_policy("init2", "image", PullPolicy::Never),
@@ -357,7 +357,6 @@ mod tests {
                     Container::with_pull_policy("ctr3", "image", PullPolicy::IfNotPresent),
                     Container::with_pull_policy("ctr4", "image", PullPolicy::Always),
                 ],
-                ephemeral_containers: vec![],
                 volumes: vec![
                     Volume::new_image(
                         "volume1",
@@ -376,6 +375,7 @@ mod tests {
                         ImageVolumeSource::new("image", PullPolicy::Always),
                     ),
                 ],
+                ..Default::default()
             },
         };
 
@@ -408,11 +408,9 @@ mod tests {
             node_name: None,
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
-            spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
-                init_containers: vec![],
+            spec: PodSpec {
                 containers: vec![Container::with_pull_policy("ctr2", "image", PullPolicy::Never)],
-                ephemeral_containers: vec![],
-                volumes: vec![],
+                ..Default::default()
             },
         };
 
@@ -518,15 +516,13 @@ mod tests {
             node_name: None,
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
-            spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
-                init_containers: vec![],
+            spec: PodSpec {
                 containers: vec![Container::with_pull_policy(
                     "ctr2",
                     "image",
                     PullPolicy::IfNotPresent,
                 )],
-                ephemeral_containers: vec![],
-                volumes: vec![],
+                ..Default::default()
             },
         };
 
@@ -536,15 +532,13 @@ mod tests {
             node_name: None,
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
-            spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
-                init_containers: vec![],
+            spec: PodSpec {
                 containers: vec![Container::with_pull_policy(
                     "ctr2",
                     "image",
                     PullPolicy::IfNotPresent,
                 )],
-                ephemeral_containers: vec![],
-                volumes: vec![],
+                ..Default::default()
             },
         };
 
@@ -554,15 +548,13 @@ mod tests {
             node_name: None,
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
-            spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
-                init_containers: vec![],
+            spec: PodSpec {
                 containers: vec![Container::with_pull_policy(
                     "ctr2",
                     "image2", // Different image!
                     PullPolicy::IfNotPresent,
                 )],
-                ephemeral_containers: vec![],
-                volumes: vec![],
+                ..Default::default()
             },
         };
 

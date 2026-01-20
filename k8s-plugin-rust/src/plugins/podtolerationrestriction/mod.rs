@@ -380,6 +380,7 @@ mod tests {
                     image: "nginx".to_string(),
                     image_pull_policy: crate::api::core::PullPolicy::IfNotPresent,
                     resources: ResourceRequirements::default(),
+                    ..Default::default()
                 }],
                 init_containers: vec![],
                 ephemeral_containers: vec![],
@@ -390,6 +391,7 @@ mod tests {
                 priority_class_name: String::new(),
                 priority: None,
                 preemption_policy: None,
+                ..Default::default()
             },
         }
     }

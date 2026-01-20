@@ -253,6 +253,53 @@ pub fn is_extended_resource_name(name: &str) -> bool {
 }
 
 // ============================================================================
+// Security Context Types
+// ============================================================================
+
+/// Capabilities represent POSIX capabilities to add/drop from a container.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct Capabilities {
+    /// Added capabilities.
+    pub add: Vec<String>,
+    /// Dropped capabilities.
+    pub drop: Vec<String>,
+}
+
+/// SecurityContext holds security configuration for a container.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct SecurityContext {
+    /// Run container in privileged mode.
+    pub privileged: Option<bool>,
+    /// Run as non-root user.
+    pub run_as_non_root: Option<bool>,
+    /// Run as a specific user ID.
+    pub run_as_user: Option<i64>,
+    /// Run as a specific group ID.
+    pub run_as_group: Option<i64>,
+    /// Allow privilege escalation.
+    pub allow_privilege_escalation: Option<bool>,
+    /// Capabilities to add/drop.
+    pub capabilities: Option<Capabilities>,
+    /// Read-only root filesystem.
+    pub read_only_root_filesystem: Option<bool>,
+}
+
+/// PodSecurityContext holds pod-level security attributes.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct PodSecurityContext {
+    /// Run as non-root user.
+    pub run_as_non_root: Option<bool>,
+    /// Run as a specific user ID.
+    pub run_as_user: Option<i64>,
+    /// Run as a specific group ID.
+    pub run_as_group: Option<i64>,
+    /// A special supplemental group that applies to all containers.
+    pub fs_group: Option<i64>,
+    /// Supplemental groups to add.
+    pub supplemental_groups: Vec<i64>,
+}
+
+// ============================================================================
 // Container
 // ============================================================================
 
@@ -267,6 +314,8 @@ pub struct Container {
     pub image_pull_policy: PullPolicy,
     /// Compute Resources required by this container.
     pub resources: ResourceRequirements,
+    /// Security context for this container.
+    pub security_context: Option<SecurityContext>,
 }
 
 impl Container {
@@ -277,6 +326,7 @@ impl Container {
             image: image.to_string(),
             image_pull_policy: PullPolicy::Empty,
             resources: ResourceRequirements::default(),
+            security_context: None,
         }
     }
 
@@ -287,6 +337,7 @@ impl Container {
             image: image.to_string(),
             image_pull_policy: policy,
             resources: ResourceRequirements::default(),
+            security_context: None,
         }
     }
 }
@@ -442,6 +493,14 @@ pub struct PodSpec {
     pub priority: Option<i32>,
     /// PreemptionPolicy is the policy for preempting lower priority pods.
     pub preemption_policy: Option<crate::plugins::podpriority::PreemptionPolicy>,
+    /// Pod-level security context.
+    pub security_context: Option<PodSecurityContext>,
+    /// Use the host's network namespace.
+    pub host_network: Option<bool>,
+    /// Use the host's PID namespace.
+    pub host_pid: Option<bool>,
+    /// Use the host's IPC namespace.
+    pub host_ipc: Option<bool>,
 }
 
 impl PodSpec {
@@ -925,16 +984,12 @@ mod tests {
     #[test]
     fn test_pod_spec_visit_containers() {
         let spec = PodSpec {
-            node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
             init_containers: vec![Container::new("init1", "busybox")],
             containers: vec![
                 Container::new("main1", "nginx"),
                 Container::new("main2", "redis"),
             ],
-            ephemeral_containers: vec![],
-            volumes: vec![],
-            affinity: None,
-            tolerations: vec![],
+            ..Default::default()
         };
 
         let mut visited = vec![];
@@ -952,16 +1007,11 @@ mod tests {
     #[test]
     fn test_pod_spec_visit_containers_short_circuit() {
         let spec = PodSpec {
-            node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
-            init_containers: vec![],
             containers: vec![
                 Container::new("main1", "nginx"),
                 Container::new("main2", "redis"),
             ],
-            ephemeral_containers: vec![],
-            volumes: vec![],
-            affinity: None,
-            tolerations: vec![],
+            ..Default::default()
         };
 
         let mut count = 0;
