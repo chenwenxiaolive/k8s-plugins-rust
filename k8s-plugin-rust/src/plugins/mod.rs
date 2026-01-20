@@ -24,6 +24,7 @@ pub mod deny;
 pub mod denyserviceexternalips;
 pub mod exists;
 pub mod extendedresourcetoleration;
+pub mod lifecycle;
 pub mod nodetaint;
 
 use crate::admission::Plugins;
@@ -118,6 +119,7 @@ pub fn register_all_admission_plugins(plugins: &Plugins) {
     denyserviceexternalips::register(plugins);
     exists::register(plugins);
     extendedresourcetoleration::register(plugins);
+    lifecycle::register(plugins);
     nodetaint::register(plugins);
     // TODO: Register remaining plugins as they are implemented
 }

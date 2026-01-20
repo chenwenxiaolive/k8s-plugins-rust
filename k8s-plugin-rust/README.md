@@ -13,12 +13,12 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 │                      Refactoring Progress                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Total Plugins:                                    36           │
-│  Completed:                                        11 (30.6%)   │
-│  Remaining:                                        25           │
+│  Completed:                                        12 (33.3%)   │
+│  Remaining:                                        24           │
 ├─────────────────────────────────────────────────────────────────┤
 │  Total Go Test Files:                              73           │
-│  Test Files Migrated:                              11           │
-│  Tests Passing:                                    88           │
+│  Test Files Migrated:                              12           │
+│  Tests Passing:                                    96           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -64,7 +64,7 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 
 | # | Package | Plugin Name | Go Path | Test Files | Status |
 |---|---------|-------------|---------|------------|--------|
-| 32 | lifecycle | NamespaceLifecycle | `namespace/lifecycle/` | `admission_test.go` | ❌ |
+| 32 | lifecycle | NamespaceLifecycle | `namespace/lifecycle/` | `admission_test.go` | ✅ Done |
 | 33 | mutatingwebhook | MutatingAdmissionWebhook | `webhook/mutating/` | `dispatcher_test.go`, `plugin_test.go` + shared | ❌ |
 | 34 | validatingwebhook | ValidatingAdmissionWebhook | `webhook/validating/` | `plugin_test.go` + shared | ❌ |
 | 35 | mutatingadmissionpolicy | MutatingAdmissionPolicy | `policy/mutating/` | `compilation_test.go`, `dispatcher_test.go`, `plugin_test.go`, etc. | ❌ |
@@ -105,6 +105,13 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 ### 10. DenyServiceExternalIPs
 - Denies new external IPs on Services
 - Allows removing or keeping existing external IPs
+
+### 11. CertificateSubjectRestriction
+- Prevents CSRs with `kubernetes.io/kube-apiserver-client` signer from using `system:masters` group
+
+### 12. NamespaceLifecycle
+- Prevents deletion of immortal namespaces (default, kube-system, kube-public)
+- Prevents creation of resources in terminating namespaces
 
 ## Project Structure
 
@@ -165,8 +172,8 @@ cargo test
 
 Current test results:
 ```
-running 72 tests
-test result: ok. 72 passed; 0 failed; 0 ignored
+running 96 tests
+test result: ok. 96 passed; 0 failed; 0 ignored
 ```
 
 ## Original Go Source
