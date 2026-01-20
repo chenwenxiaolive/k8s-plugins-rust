@@ -242,7 +242,7 @@ mod tests {
 
     #[test]
     fn test_attributes_record_new_pod() {
-        let pod = Pod {
+        let pod = Pod { annotations: std::collections::HashMap::new(),
             name: "test-pod".to_string(),
             namespace: "default".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![],

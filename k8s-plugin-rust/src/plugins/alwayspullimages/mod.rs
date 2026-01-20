@@ -261,7 +261,7 @@ mod tests {
     fn test_admission() {
         let handler = AlwaysPullImages::new();
 
-        let pod = Pod {
+        let pod = Pod { annotations: std::collections::HashMap::new(),
             name: "123".to_string(),
             namespace: "test".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![],
@@ -337,7 +337,7 @@ mod tests {
     fn test_validate() {
         let handler = AlwaysPullImages::new();
 
-        let pod = Pod {
+        let pod = Pod { annotations: std::collections::HashMap::new(),
             name: "123".to_string(),
             namespace: "test".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![],
@@ -399,7 +399,7 @@ mod tests {
     /// subresources, and non-pods.
     #[test]
     fn test_other_resources() {
-        let pod = Pod {
+        let pod = Pod { annotations: std::collections::HashMap::new(),
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![],
@@ -507,7 +507,7 @@ mod tests {
     /// images were changed in the new pod spec.
     #[test]
     fn test_update_pod() {
-        let old_pod = Pod {
+        let old_pod = Pod { annotations: std::collections::HashMap::new(),
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![],
@@ -523,7 +523,7 @@ mod tests {
         };
 
         // Only add new annotation (no image change)
-        let pod = Pod {
+        let pod = Pod { annotations: std::collections::HashMap::new(),
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![],
@@ -539,7 +539,7 @@ mod tests {
         };
 
         // Add new label and change image
-        let pod_with_new_image = Pod {
+        let pod_with_new_image = Pod { annotations: std::collections::HashMap::new(),
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![],

@@ -15,8 +15,12 @@
 //! Core Kubernetes API types (Pod, Container, Volume, Node, etc.)
 
 use std::any::Any;
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fmt;
+
+/// ResourceList is a map of resource names to quantity strings.
+pub type ResourceList = HashMap<String, String>;
 
 /// ApiObject is a trait for Kubernetes API objects that can be used in admission.
 pub trait ApiObject: Send + Sync {
@@ -253,7 +257,7 @@ pub fn is_extended_resource_name(name: &str) -> bool {
 // ============================================================================
 
 /// Container represents a single container in a pod.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Container {
     /// Name of the container.
     pub name: String,
@@ -519,6 +523,8 @@ pub struct Pod {
     pub namespace: String,
     /// Pod specification.
     pub spec: PodSpec,
+    /// Annotations is an unstructured key value map.
+    pub annotations: std::collections::HashMap<String, String>,
 }
 
 impl Pod {
@@ -528,6 +534,7 @@ impl Pod {
             name: name.to_string(),
             namespace: namespace.to_string(),
             spec: PodSpec::default(),
+            annotations: std::collections::HashMap::new(),
         }
     }
 }
