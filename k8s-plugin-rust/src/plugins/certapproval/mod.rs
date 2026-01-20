@@ -18,7 +18,7 @@
 //! CertificateSigningRequests for specific signerNames.
 
 use crate::admission::{
-    AdmissionError, AdmissionResult, Attributes, Handler, Interface, Operation, Plugins,
+    AdmissionResult, Attributes, Handler, Interface, Operation, Plugins,
     ValidationInterface,
 };
 use std::io::Read;
@@ -42,6 +42,7 @@ pub trait Authorizer: Send + Sync {
 /// Plugin validates CSR approval permissions.
 pub struct Plugin {
     handler: Handler,
+    #[allow(dead_code)]
     authorizer: Option<Arc<dyn Authorizer>>,
 }
 
