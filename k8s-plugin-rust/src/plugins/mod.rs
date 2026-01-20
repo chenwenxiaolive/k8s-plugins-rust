@@ -21,6 +21,7 @@ pub mod autoprovision;
 pub mod defaulttolerationseconds;
 pub mod deny;
 pub mod exists;
+pub mod extendedresourcetoleration;
 pub mod nodetaint;
 
 use crate::admission::Plugins;
@@ -112,6 +113,7 @@ pub fn register_all_admission_plugins(plugins: &Plugins) {
     defaulttolerationseconds::register(plugins);
     deny::register(plugins);
     exists::register(plugins);
+    extendedresourcetoleration::register(plugins);
     nodetaint::register(plugins);
     // TODO: Register remaining plugins as they are implemented
 }

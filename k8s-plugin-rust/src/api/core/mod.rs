@@ -211,6 +211,44 @@ impl fmt::Display for PullPolicy {
 }
 
 // ============================================================================
+// Resource Types
+// ============================================================================
+
+/// ResourceRequirements describes the compute resource requirements.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct ResourceRequirements {
+    /// Requests describes the minimum amount of compute resources required.
+    pub requests: std::collections::HashMap<String, String>,
+    /// Limits describes the maximum amount of compute resources allowed.
+    pub limits: std::collections::HashMap<String, String>,
+}
+
+/// Check if a resource name is an extended resource name.
+/// Extended resources are resources that are not built-in (cpu, memory, etc.)
+pub fn is_extended_resource_name(name: &str) -> bool {
+    // Extended resources must contain a '/' and not be in the kubernetes.io namespace
+    if !name.contains('/') {
+        return false;
+    }
+    // Standard resources prefixes that are not extended resources
+    let standard_prefixes = [
+        "kubernetes.io/",
+        "requests.cpu",
+        "requests.memory",
+        "limits.cpu",
+        "limits.memory",
+        "hugepages-",
+        "attachable-volumes-",
+    ];
+    for prefix in &standard_prefixes {
+        if name.starts_with(prefix) {
+            return false;
+        }
+    }
+    true
+}
+
+// ============================================================================
 // Container
 // ============================================================================
 
@@ -223,6 +261,8 @@ pub struct Container {
     pub image: String,
     /// Image pull policy.
     pub image_pull_policy: PullPolicy,
+    /// Compute Resources required by this container.
+    pub resources: ResourceRequirements,
 }
 
 impl Container {
@@ -232,6 +272,7 @@ impl Container {
             name: name.to_string(),
             image: image.to_string(),
             image_pull_policy: PullPolicy::Empty,
+            resources: ResourceRequirements::default(),
         }
     }
 
@@ -241,6 +282,7 @@ impl Container {
             name: name.to_string(),
             image: image.to_string(),
             image_pull_policy: policy,
+            resources: ResourceRequirements::default(),
         }
     }
 }

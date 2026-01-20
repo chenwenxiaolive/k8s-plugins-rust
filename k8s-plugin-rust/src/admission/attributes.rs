@@ -251,6 +251,7 @@ mod tests {
                     name: "test".to_string(),
                     image: "nginx".to_string(),
                     image_pull_policy: PullPolicy::IfNotPresent,
+                    resources: crate::api::core::ResourceRequirements::default(),
                 }],
                 ephemeral_containers: vec![],
                 volumes: vec![],
