@@ -1,0 +1,12 @@
+[package]
+name = "k8s-plugin-rust"
+version = "0.1.0"
+edition = "2021"
+description = "Kubernetes Admission Plugins reimplemented in Rust"
+license = "Apache-2.0"
+
+[dependencies]
+thiserror = "1.0"
+anyhow = "1.0"
+
+[dev-dependencies]

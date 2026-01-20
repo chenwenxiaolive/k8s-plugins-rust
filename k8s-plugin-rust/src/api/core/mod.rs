@@ -1,0 +1,409 @@
+// Copyright 2024 The Kubernetes Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+//! Core Kubernetes API types (Pod, Container, Volume, etc.)
+
+use std::any::Any;
+use std::collections::HashSet;
+use std::fmt;
+
+/// ApiObject is a trait for Kubernetes API objects that can be used in admission.
+pub trait ApiObject: Send + Sync {
+    /// Returns the object as Any for downcasting.
+    fn as_any(&self) -> &dyn Any;
+
+    /// Returns the object as mutable Any for downcasting.
+    fn as_any_mut(&mut self) -> &mut dyn Any;
+
+    /// Returns the kind of this object.
+    fn kind(&self) -> &str;
+}
+
+/// PullPolicy describes a policy for if/when to pull a container image.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub enum PullPolicy {
+    /// Always means that kubelet always attempts to pull the latest image.
+    Always,
+    /// Never means that kubelet never pulls an image, but only uses a local image.
+    Never,
+    /// IfNotPresent means that kubelet pulls if the image isn't present on disk.
+    #[default]
+    IfNotPresent,
+    /// Empty represents an unset pull policy (defaults to IfNotPresent in practice).
+    Empty,
+}
+
+impl PullPolicy {
+    /// Returns the string representation of the pull policy.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            PullPolicy::Always => "Always",
+            PullPolicy::Never => "Never",
+            PullPolicy::IfNotPresent => "IfNotPresent",
+            PullPolicy::Empty => "",
+        }
+    }
+
+    /// Parse a pull policy from a string.
+    pub fn from_str(s: &str) -> Self {
+        match s {
+            "Always" => PullPolicy::Always,
+            "Never" => PullPolicy::Never,
+            "IfNotPresent" => PullPolicy::IfNotPresent,
+            "" => PullPolicy::Empty,
+            _ => PullPolicy::Empty,
+        }
+    }
+}
+
+impl fmt::Display for PullPolicy {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+/// Container represents a single container in a pod.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Container {
+    /// Name of the container.
+    pub name: String,
+    /// Container image name.
+    pub image: String,
+    /// Image pull policy.
+    pub image_pull_policy: PullPolicy,
+}
+
+impl Container {
+    /// Create a new container with the given name and image.
+    pub fn new(name: &str, image: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            image: image.to_string(),
+            image_pull_policy: PullPolicy::Empty,
+        }
+    }
+
+    /// Create a new container with a specific pull policy.
+    pub fn with_pull_policy(name: &str, image: &str, policy: PullPolicy) -> Self {
+        Self {
+            name: name.to_string(),
+            image: image.to_string(),
+            image_pull_policy: policy,
+        }
+    }
+}
+
+/// ImageVolumeSource represents a volume that is backed by an image.
+/// KEP-4639: https://kep.k8s.io/4639
+#[derive(Debug, Clone, PartialEq)]
+pub struct ImageVolumeSource {
+    /// The image reference.
+    pub reference: String,
+    /// Image pull policy.
+    pub pull_policy: PullPolicy,
+}
+
+impl ImageVolumeSource {
+    /// Create a new image volume source.
+    pub fn new(reference: &str, pull_policy: PullPolicy) -> Self {
+        Self {
+            reference: reference.to_string(),
+            pull_policy,
+        }
+    }
+}
+
+/// VolumeSource represents the source of a volume.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct VolumeSource {
+    /// Image volume source (KEP-4639).
+    pub image: Option<ImageVolumeSource>,
+    // Other volume sources would be added here (EmptyDir, HostPath, etc.)
+}
+
+/// Volume represents a volume in a pod.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Volume {
+    /// Name of the volume.
+    pub name: String,
+    /// Volume source.
+    pub volume_source: VolumeSource,
+}
+
+impl Volume {
+    /// Create a new volume with the given name.
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            volume_source: VolumeSource::default(),
+        }
+    }
+
+    /// Create a new image volume.
+    pub fn new_image(name: &str, image_source: ImageVolumeSource) -> Self {
+        Self {
+            name: name.to_string(),
+            volume_source: VolumeSource {
+                image: Some(image_source),
+            },
+        }
+    }
+}
+
+/// PodSpec describes the specification of a pod.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct PodSpec {
+    /// List of initialization containers.
+    pub init_containers: Vec<Container>,
+    /// List of containers.
+    pub containers: Vec<Container>,
+    /// List of ephemeral containers.
+    pub ephemeral_containers: Vec<Container>,
+    /// List of volumes.
+    pub volumes: Vec<Volume>,
+}
+
+impl PodSpec {
+    /// Create a new empty PodSpec.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Visit all containers with their field paths.
+    /// Returns true if all visitors returned true, false if any returned false (short-circuit).
+    pub fn visit_containers_with_path<F>(&self, base_path: &str, mut visitor: F) -> bool
+    where
+        F: FnMut(&Container, String) -> bool,
+    {
+        for (i, c) in self.init_containers.iter().enumerate() {
+            let path = format!("{}.initContainers[{}]", base_path, i);
+            if !visitor(c, path) {
+                return false;
+            }
+        }
+        for (i, c) in self.containers.iter().enumerate() {
+            let path = format!("{}.containers[{}]", base_path, i);
+            if !visitor(c, path) {
+                return false;
+            }
+        }
+        for (i, c) in self.ephemeral_containers.iter().enumerate() {
+            let path = format!("{}.ephemeralContainers[{}]", base_path, i);
+            if !visitor(c, path) {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Visit all containers mutably with their field paths.
+    pub fn visit_containers_with_path_mut<F>(&mut self, base_path: &str, mut visitor: F) -> bool
+    where
+        F: FnMut(&mut Container, String) -> bool,
+    {
+        for (i, c) in self.init_containers.iter_mut().enumerate() {
+            let path = format!("{}.initContainers[{}]", base_path, i);
+            if !visitor(c, path) {
+                return false;
+            }
+        }
+        for (i, c) in self.containers.iter_mut().enumerate() {
+            let path = format!("{}.containers[{}]", base_path, i);
+            if !visitor(c, path) {
+                return false;
+            }
+        }
+        for (i, c) in self.ephemeral_containers.iter_mut().enumerate() {
+            let path = format!("{}.ephemeralContainers[{}]", base_path, i);
+            if !visitor(c, path) {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Get all container images as a set.
+    pub fn get_all_images(&self) -> HashSet<String> {
+        let mut images = HashSet::new();
+        for c in &self.init_containers {
+            images.insert(c.image.clone());
+        }
+        for c in &self.containers {
+            images.insert(c.image.clone());
+        }
+        for c in &self.ephemeral_containers {
+            images.insert(c.image.clone());
+        }
+        images
+    }
+}
+
+/// Pod represents a Kubernetes Pod.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Pod {
+    /// Name of the pod.
+    pub name: String,
+    /// Namespace of the pod.
+    pub namespace: String,
+    /// Pod specification.
+    pub spec: PodSpec,
+}
+
+impl Pod {
+    /// Create a new pod with the given name and namespace.
+    pub fn new(name: &str, namespace: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            namespace: namespace.to_string(),
+            spec: PodSpec::default(),
+        }
+    }
+}
+
+impl ApiObject for Pod {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn kind(&self) -> &str {
+        "Pod"
+    }
+}
+
+/// Service represents a Kubernetes Service (for testing non-pod resources).
+#[derive(Debug, Clone, PartialEq)]
+pub struct Service {
+    pub name: String,
+    pub namespace: String,
+}
+
+impl ApiObject for Service {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn kind(&self) -> &str {
+        "Service"
+    }
+}
+
+/// Helper to create a core API resource GroupResource.
+pub fn resource(name: &str) -> crate::admission::attributes::GroupResource {
+    crate::admission::attributes::GroupResource::new("", name)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_pull_policy() {
+        assert_eq!(PullPolicy::Always.as_str(), "Always");
+        assert_eq!(PullPolicy::Never.as_str(), "Never");
+        assert_eq!(PullPolicy::IfNotPresent.as_str(), "IfNotPresent");
+        assert_eq!(PullPolicy::Empty.as_str(), "");
+
+        assert_eq!(PullPolicy::from_str("Always"), PullPolicy::Always);
+        assert_eq!(PullPolicy::from_str("Never"), PullPolicy::Never);
+        assert_eq!(PullPolicy::from_str("IfNotPresent"), PullPolicy::IfNotPresent);
+        assert_eq!(PullPolicy::from_str(""), PullPolicy::Empty);
+    }
+
+    #[test]
+    fn test_container() {
+        let container = Container::new("test", "nginx:latest");
+        assert_eq!(container.name, "test");
+        assert_eq!(container.image, "nginx:latest");
+        assert_eq!(container.image_pull_policy, PullPolicy::Empty);
+
+        let container = Container::with_pull_policy("test", "nginx:latest", PullPolicy::Always);
+        assert_eq!(container.image_pull_policy, PullPolicy::Always);
+    }
+
+    #[test]
+    fn test_pod_spec_visit_containers() {
+        let spec = PodSpec {
+            init_containers: vec![Container::new("init1", "busybox")],
+            containers: vec![
+                Container::new("main1", "nginx"),
+                Container::new("main2", "redis"),
+            ],
+            ephemeral_containers: vec![],
+            volumes: vec![],
+        };
+
+        let mut visited = vec![];
+        spec.visit_containers_with_path("spec", |c, path| {
+            visited.push((c.name.clone(), path));
+            true
+        });
+
+        assert_eq!(visited.len(), 3);
+        assert_eq!(visited[0], ("init1".to_string(), "spec.initContainers[0]".to_string()));
+        assert_eq!(visited[1], ("main1".to_string(), "spec.containers[0]".to_string()));
+        assert_eq!(visited[2], ("main2".to_string(), "spec.containers[1]".to_string()));
+    }
+
+    #[test]
+    fn test_pod_spec_visit_containers_short_circuit() {
+        let spec = PodSpec {
+            init_containers: vec![],
+            containers: vec![
+                Container::new("main1", "nginx"),
+                Container::new("main2", "redis"),
+            ],
+            ephemeral_containers: vec![],
+            volumes: vec![],
+        };
+
+        let mut count = 0;
+        let result = spec.visit_containers_with_path("spec", |_, _| {
+            count += 1;
+            false // Stop after first
+        });
+
+        assert!(!result);
+        assert_eq!(count, 1);
+    }
+
+    #[test]
+    fn test_pod_as_api_object() {
+        let pod = Pod::new("test", "default");
+        let obj: &dyn ApiObject = &pod;
+        assert_eq!(obj.kind(), "Pod");
+
+        let downcast = obj.as_any().downcast_ref::<Pod>();
+        assert!(downcast.is_some());
+        assert_eq!(downcast.unwrap().name, "test");
+    }
+
+    #[test]
+    fn test_image_volume() {
+        let vol = Volume::new_image(
+            "my-image-vol",
+            ImageVolumeSource::new("nginx:latest", PullPolicy::Never),
+        );
+        assert_eq!(vol.name, "my-image-vol");
+        assert!(vol.volume_source.image.is_some());
+        assert_eq!(vol.volume_source.image.unwrap().pull_policy, PullPolicy::Never);
+    }
+}

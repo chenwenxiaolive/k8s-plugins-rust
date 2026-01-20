@@ -1,0 +1,19 @@
+# Rust build artifacts
+/target/
+k8s-plugin-rust/target/
+
+# Cargo lock file for libraries (optional, but commonly ignored for libs)
+# Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kubernetes source (large, not needed in repo)
+kubernetes/
