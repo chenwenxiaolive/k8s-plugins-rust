@@ -1,10 +1,9 @@
 # Kubernetes Admission Plugins in Rust
 
-A complete Rust implementation of Kubernetes admission controller plugins, ported from the official Kubernetes v1.34.1 Go codebase.
+A Rust implementation of Kubernetes admission controller plugins, ported from the official Kubernetes v1.34.1 Go codebase.
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
 [![Tests](https://img.shields.io/badge/tests-201%20passed-brightgreen)]()
-[![Plugins](https://img.shields.io/badge/plugins-36%2F36-brightgreen)]()
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)]()
 
 ## 🎯 Project Goal
@@ -15,9 +14,12 @@ Rewrite all 36 Kubernetes admission plugins from `pkg/kubeapiserver/options/plug
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    ✅ REFACTORING COMPLETE                      │
+│                      Refactoring Progress                       │
 ├─────────────────────────────────────────────────────────────────┤
-│  Plugins Implemented:                          36/36 (100%)     │
+│  Total Plugins:                                36               │
+│  Full Implementation:                          15 (42%)         │
+│  Skeleton Implementation:                      21 (58%)         │
+├─────────────────────────────────────────────────────────────────┤
 │  Unit Tests Passing:                           201              │
 │  Compilation Warnings:                         0                │
 └─────────────────────────────────────────────────────────────────┘
@@ -37,53 +39,57 @@ cargo build
 cargo test
 ```
 
-## 📦 Implemented Plugins
+## 📦 Plugin Implementation Status
 
-### Category 1: Local Plugins (31 modules)
+### ✅ Fully Implemented (15 plugins)
 
-| # | Plugin Name | Description | Rust Module |
-|---|-------------|-------------|-------------|
-| 1 | AlwaysAdmit | Always admits requests (deprecated) | `admit` |
-| 2 | AlwaysDeny | Always denies requests (deprecated) | `deny` |
-| 3 | AlwaysPullImages | Forces `Always` image pull policy | `alwayspullimages` |
-| 4 | LimitPodHardAntiAffinityTopology | Validates anti-affinity topology keys | `antiaffinity` |
-| 5 | TaintNodesByCondition | Adds NotReady taint to new nodes | `nodetaint` |
-| 6 | NamespaceExists | Rejects requests for non-existent namespaces | `exists` |
-| 7 | NamespaceAutoProvision | Auto-creates namespaces on demand | `autoprovision` |
-| 8 | NamespaceLifecycle | Protects system namespaces from deletion | `lifecycle` |
-| 9 | DefaultTolerationSeconds | Adds default tolerations (300s) | `defaulttolerationseconds` |
-| 10 | ExtendedResourceToleration | Adds tolerations for extended resources | `extendedresourcetoleration` |
-| 11 | DenyServiceExternalIPs | Denies new external IPs on Services | `denyserviceexternalips` |
-| 12 | CertificateApproval | Validates CSR approval permissions | `certapproval` |
-| 13 | CertificateSigning | Validates CSR signing permissions | `certsigning` |
-| 14 | CertificateSubjectRestriction | Restricts system:masters group in CSRs | `certsubjectrestriction` |
-| 15 | ClusterTrustBundleAttest | Validates ClusterTrustBundle attestation | `ctbattest` |
-| 16 | LimitRanger | Enforces resource limits per namespace | `limitranger` |
-| 17 | PodNodeSelector | Enforces node selector constraints | `podnodeselector` |
-| 18 | PodTolerationRestriction | Restricts pod tolerations | `podtolerationrestriction` |
-| 19 | PodTopologyLabels | Manages pod topology labels | `podtopologylabels` |
-| 20 | Priority | Resolves pod priority from PriorityClass | `podpriority` |
-| 21 | DefaultIngressClass | Sets default ingress class | `defaultingressclass` |
-| 22 | NodeRestriction | Restricts node self-modification | `noderestriction` |
-| 23 | EventRateLimit | Rate limits event creation | `eventratelimit` |
-| 24 | OwnerReferencesPermissionEnforcement | Enforces owner reference permissions | `gc` |
-| 25 | ImagePolicyWebhook | External image policy validation | `imagepolicy` |
-| 26 | RuntimeClass | Sets pod overhead from RuntimeClass | `runtimeclass` |
-| 27 | PodSecurity | Enforces Pod Security Standards | `podsecurity` |
-| 28 | ServiceAccount | Manages service account tokens | `serviceaccount` |
-| 29 | PersistentVolumeClaimResize | Validates PVC resize requests | `resize` |
-| 30 | DefaultStorageClass | Sets default storage class | `setdefault` |
-| 31 | StorageObjectInUseProtection | Protects in-use storage objects | `storageobjectinuseprotection` |
+These plugins have complete business logic matching the Go implementation:
 
-### Category 2: Apiserver Core Plugins (5 modules)
+| # | Plugin Name | Description | Rust Module | Lines |
+|---|-------------|-------------|-------------|-------|
+| 1 | AlwaysAdmit | Always admits requests (deprecated) | `admit` | 159 |
+| 2 | AlwaysDeny | Always denies requests (deprecated) | `deny` | 174 |
+| 3 | AlwaysPullImages | Forces `Always` image pull policy | `alwayspullimages` | 628 |
+| 4 | LimitPodHardAntiAffinityTopology | Validates anti-affinity topology keys | `antiaffinity` | 432 |
+| 5 | TaintNodesByCondition | Adds NotReady taint to new nodes | `nodetaint` | 308 |
+| 6 | NamespaceExists | Rejects requests for non-existent namespaces | `exists` | 394 |
+| 7 | NamespaceAutoProvision | Auto-creates namespaces on demand | `autoprovision` | 433 |
+| 8 | NamespaceLifecycle | Protects system namespaces from deletion | `lifecycle` | 415 |
+| 9 | LimitRanger | Enforces resource limits per namespace | `limitranger` | 986 |
+| 10 | PodNodeSelector | Enforces node selector constraints | `podnodeselector` | 564 |
+| 11 | Priority | Resolves pod priority from PriorityClass | `podpriority` | 572 |
+| 12 | DefaultTolerationSeconds | Adds default tolerations (300s) | `defaulttolerationseconds` | 491 |
+| 13 | ExtendedResourceToleration | Adds tolerations for extended resources | `extendedresourcetoleration` | 345 |
+| 14 | DenyServiceExternalIPs | Denies new external IPs on Services | `denyserviceexternalips` | 325 |
+| 15 | CertificateSubjectRestriction | Restricts system:masters group in CSRs | `certsubjectrestriction` | 318 |
 
-| # | Plugin Name | Description | Rust Module |
-|---|-------------|-------------|-------------|
-| 32 | ResourceQuota | Enforces resource quota limits | `resourcequota` |
-| 33 | MutatingAdmissionWebhook | Calls mutating admission webhooks | `mutatingwebhook` |
-| 34 | ValidatingAdmissionWebhook | Calls validating admission webhooks | `validatingwebhook` |
-| 35 | MutatingAdmissionPolicy | CEL-based mutation policies | `mutatingadmissionpolicy` |
-| 36 | ValidatingAdmissionPolicy | CEL-based validation policies | `validatingadmissionpolicy` |
+### 🔧 Skeleton Implementation (21 plugins)
+
+These plugins have the correct interface structure but need business logic implementation. They require Kubernetes client infrastructure (Informers, Listers, HTTP clients) that is not yet available in this Rust codebase.
+
+| # | Plugin Name | Rust Module | Missing Dependencies |
+|---|-------------|-------------|----------------------|
+| 16 | CertificateApproval | `certapproval` | Authorizer, CSR Lister |
+| 17 | CertificateSigning | `certsigning` | Signer, CSR Lister |
+| 18 | ClusterTrustBundleAttest | `ctbattest` | ClusterTrustBundle Lister |
+| 19 | EventRateLimit | `eventratelimit` | Rate Limiter, Event Cache |
+| 20 | OwnerReferencesPermissionEnforcement | `gc` | Authorizer |
+| 21 | ImagePolicyWebhook | `imagepolicy` | HTTP Client, TLS, Webhook Server |
+| 22 | DefaultIngressClass | `defaultingressclass` | IngressClass Lister |
+| 23 | NodeRestriction | `noderestriction` | Node Lister, Authorizer |
+| 24 | PodTolerationRestriction | `podtolerationrestriction` | Namespace Lister, Config |
+| 25 | PodTopologyLabels | `podtopologylabels` | Node Lister |
+| 26 | RuntimeClass | `runtimeclass` | RuntimeClass Lister |
+| 27 | PodSecurity | `podsecurity` | Pod Security Standards Evaluator |
+| 28 | ServiceAccount | `serviceaccount` | ServiceAccount Lister, Secret Lister |
+| 29 | PersistentVolumeClaimResize | `resize` | PVC Lister, StorageClass Lister |
+| 30 | DefaultStorageClass | `setdefault` | StorageClass Lister |
+| 31 | StorageObjectInUseProtection | `storageobjectinuseprotection` | PV/PVC Lister |
+| 32 | ResourceQuota | `resourcequota` | Quota Evaluator, Registry |
+| 33 | MutatingAdmissionWebhook | `mutatingwebhook` | Webhook Client, JSON Patch |
+| 34 | ValidatingAdmissionWebhook | `validatingwebhook` | Webhook Client |
+| 35 | MutatingAdmissionPolicy | `mutatingadmissionpolicy` | CEL Compiler, Expression Evaluator |
+| 36 | ValidatingAdmissionPolicy | `validatingadmissionpolicy` | CEL Compiler, Expression Evaluator |
 
 ## 🏗️ Architecture
 
@@ -179,18 +185,19 @@ This project is a port of the following Kubernetes v1.34.1 source files:
 | `plugin/pkg/admission/*/` | Local admission plugins (31) |
 | `staging/src/k8s.io/apiserver/pkg/admission/plugin/*/` | Apiserver plugins (5) |
 
-## 🔄 Default Plugin Configuration
+## 🔄 Next Steps
 
-Plugins enabled by default in kube-apiserver:
-- NamespaceLifecycle, LimitRanger, ServiceAccount
-- DefaultStorageClass, PersistentVolumeClaimResize
-- DefaultTolerationSeconds, Priority, RuntimeClass
-- TaintNodesByCondition, PodSecurity, DefaultIngressClass
-- MutatingAdmissionWebhook, ValidatingAdmissionWebhook
-- ResourceQuota, StorageObjectInUseProtection
-- CertificateApproval, CertificateSigning, ClusterTrustBundleAttest
-- CertificateSubjectRestriction, PodTopologyLabels
-- MutatingAdmissionPolicy, ValidatingAdmissionPolicy
+To complete the remaining 21 plugins, the following infrastructure needs to be implemented:
+
+1. **Kubernetes Client Library**
+   - Informer/Lister mechanism
+   - REST client for API server
+   - Watch mechanism for resource changes
+
+2. **External Dependencies**
+   - CEL (Common Expression Language) compiler for admission policies
+   - HTTP client for webhook calls
+   - TLS configuration for secure communications
 
 ## 📄 License
 
