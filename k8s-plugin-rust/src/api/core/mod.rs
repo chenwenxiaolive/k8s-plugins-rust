@@ -436,6 +436,12 @@ pub struct PodSpec {
     pub tolerations: Vec<Toleration>,
     /// NodeSelector is a selector which must be true for the pod to fit on a node.
     pub node_selector: HashMap<String, String>,
+    /// PriorityClassName is the name of the PriorityClass for this pod.
+    pub priority_class_name: String,
+    /// Priority is the priority value assigned to this pod.
+    pub priority: Option<i32>,
+    /// PreemptionPolicy is the policy for preempting lower priority pods.
+    pub preemption_policy: Option<crate::plugins::podpriority::PreemptionPolicy>,
 }
 
 impl PodSpec {
@@ -812,7 +818,7 @@ mod tests {
     #[test]
     fn test_pod_spec_visit_containers() {
         let spec = PodSpec {
-            node_selector: std::collections::HashMap::new(),
+            node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
             init_containers: vec![Container::new("init1", "busybox")],
             containers: vec![
                 Container::new("main1", "nginx"),
@@ -839,7 +845,7 @@ mod tests {
     #[test]
     fn test_pod_spec_visit_containers_short_circuit() {
         let spec = PodSpec {
-            node_selector: std::collections::HashMap::new(),
+            node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
             init_containers: vec![],
             containers: vec![
                 Container::new("main1", "nginx"),

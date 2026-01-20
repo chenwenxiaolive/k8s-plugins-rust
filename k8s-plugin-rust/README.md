@@ -13,12 +13,12 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 │                      Refactoring Progress                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Total Plugins:                                    36           │
-│  Completed:                                        14 (38.9%)   │
-│  Remaining:                                        22           │
+│  Completed:                                        15 (41.7%)   │
+│  Remaining:                                        21           │
 ├─────────────────────────────────────────────────────────────────┤
 │  Total Go Test Files:                              73           │
-│  Test Files Migrated:                              14           │
-│  Tests Passing:                                    125          │
+│  Test Files Migrated:                              15           │
+│  Tests Passing:                                    134          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -51,7 +51,7 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 | 21 | podnodeselector | PodNodeSelector | `podnodeselector/` | `admission_test.go` | ✅ Done |
 | 22 | podtolerationrestriction | PodTolerationRestriction | `podtolerationrestriction/` | `admission_test.go`, `validation_test.go` | ❌ |
 | 23 | podtopologylabels | PodTopologyLabels | `podtopologylabels/` | `admission_test.go` | ❌ |
-| 24 | podpriority | Priority | `priority/` | `admission_test.go` | ❌ |
+| 24 | podpriority | Priority | `priority/` | `admission_test.go` | ✅ Done |
 | 25 | runtimeclass | RuntimeClass | `runtimeclass/` | `admission_test.go` | ❌ |
 | 26 | podsecurity | PodSecurity | `security/podsecurity/` | `admission_test.go` | ❌ |
 | 27 | serviceaccount | ServiceAccount | `serviceaccount/` | `admission_test.go` | ❌ |
@@ -113,10 +113,10 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 - Prevents deletion of immortal namespaces (default, kube-system, kube-public)
 - Prevents creation of resources in terminating namespaces
 
-### 14. PodNodeSelector
-- Enforces that pods use node selectors matching namespace's allowed selectors
-- Merges namespace node selector with pod node selector
-- Validates against namespace whitelist
+### 15. Priority (PodPriority)
+- Resolves pod priority based on PriorityClass
+- Validates PriorityClass resources (only one global default allowed)
+- Sets default priority when no PriorityClass specified
 
 ## Project Structure
 
@@ -177,8 +177,8 @@ cargo test
 
 Current test results:
 ```
-running 125 tests
-test result: ok. 125 passed; 0 failed; 0 ignored
+running 134 tests
+test result: ok. 134 passed; 0 failed; 0 ignored
 ```
 
 ## Original Go Source

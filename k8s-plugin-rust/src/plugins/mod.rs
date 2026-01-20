@@ -28,6 +28,7 @@ pub mod lifecycle;
 pub mod limitranger;
 pub mod nodetaint;
 pub mod podnodeselector;
+pub mod podpriority;
 
 use crate::admission::Plugins;
 
@@ -125,6 +126,7 @@ pub fn register_all_admission_plugins(plugins: &Plugins) {
     limitranger::register(plugins);
     nodetaint::register(plugins);
     podnodeselector::register(plugins);
+    podpriority::register(plugins);
     // TODO: Register remaining plugins as they are implemented
 }
 
