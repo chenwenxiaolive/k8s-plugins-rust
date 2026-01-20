@@ -533,6 +533,10 @@ pub struct Pod {
     pub spec: PodSpec,
     /// Annotations is an unstructured key value map.
     pub annotations: std::collections::HashMap<String, String>,
+    /// Labels is an unstructured key value map.
+    pub labels: std::collections::HashMap<String, String>,
+    /// NodeName is the name of the node this pod is scheduled to.
+    pub node_name: Option<String>,
 }
 
 impl Pod {
@@ -543,6 +547,8 @@ impl Pod {
             namespace: namespace.to_string(),
             spec: PodSpec::default(),
             annotations: std::collections::HashMap::new(),
+            labels: std::collections::HashMap::new(),
+            node_name: None,
         }
     }
 }
@@ -648,8 +654,10 @@ pub struct NodeStatus {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Node {
     pub name: String,
+    pub labels: HashMap<String, String>,
     pub spec: NodeSpec,
     pub status: NodeStatus,
+    pub taints: Vec<Taint>,
 }
 
 impl Node {
@@ -657,8 +665,21 @@ impl Node {
     pub fn new(name: &str) -> Self {
         Self {
             name: name.to_string(),
+            labels: HashMap::new(),
             spec: NodeSpec::default(),
             status: NodeStatus::default(),
+            taints: vec![],
+        }
+    }
+
+    /// Create a new node with labels.
+    pub fn with_labels(name: &str, labels: HashMap<String, String>) -> Self {
+        Self {
+            name: name.to_string(),
+            labels,
+            spec: NodeSpec::default(),
+            status: NodeStatus::default(),
+            taints: vec![],
         }
     }
 
@@ -697,12 +718,21 @@ impl ApiObject for Node {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Namespace {
     pub name: String,
+    pub annotations: HashMap<String, String>,
 }
 
 impl Namespace {
     pub fn new(name: &str) -> Self {
         Self {
             name: name.to_string(),
+            annotations: HashMap::new(),
+        }
+    }
+
+    pub fn with_annotations(name: &str, annotations: HashMap<String, String>) -> Self {
+        Self {
+            name: name.to_string(),
+            annotations,
         }
     }
 }
@@ -771,6 +801,83 @@ impl ApiObject for Service {
 
     fn kind(&self) -> &str {
         "Service"
+    }
+}
+
+// ============================================================================
+// ObjectReference
+// ============================================================================
+
+/// ObjectReference contains enough information to let you inspect or modify the referred object.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct ObjectReference {
+    /// Kind of the referent.
+    pub kind: Option<String>,
+    /// Namespace of the referent.
+    pub namespace: Option<String>,
+    /// Name of the referent.
+    pub name: Option<String>,
+    /// UID of the referent.
+    pub uid: Option<String>,
+    /// API version of the referent.
+    pub api_version: Option<String>,
+    /// Specific resourceVersion to which this reference is made.
+    pub resource_version: Option<String>,
+    /// If referring to a piece of an object instead of an entire object.
+    pub field_path: Option<String>,
+}
+
+impl ObjectReference {
+    /// Create a new object reference.
+    pub fn new(kind: &str, name: &str) -> Self {
+        Self {
+            kind: Some(kind.to_string()),
+            name: Some(name.to_string()),
+            ..Default::default()
+        }
+    }
+}
+
+// ============================================================================
+// Binding
+// ============================================================================
+
+/// Binding ties one object to another; for example, a pod is bound to a node by a scheduler.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Binding {
+    /// Name of the binding.
+    pub name: String,
+    /// Namespace of the binding.
+    pub namespace: String,
+    /// Labels is an unstructured key value map.
+    pub labels: HashMap<String, String>,
+    /// Target is the object to bind to.
+    pub target: ObjectReference,
+}
+
+impl Binding {
+    /// Create a new binding.
+    pub fn new(name: &str, namespace: &str, target: ObjectReference) -> Self {
+        Self {
+            name: name.to_string(),
+            namespace: namespace.to_string(),
+            labels: HashMap::new(),
+            target,
+        }
+    }
+}
+
+impl ApiObject for Binding {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn kind(&self) -> &str {
+        "Binding"
     }
 }
 

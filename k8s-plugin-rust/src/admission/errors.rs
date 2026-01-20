@@ -42,6 +42,10 @@ pub enum AdmissionError {
     /// NotFound indicates a resource was not found.
     #[error("{kind} \"{name}\" not found")]
     NotFound { kind: String, name: String },
+
+    /// TooManyRequests indicates rate limiting.
+    #[error("Too Many Requests: {0}")]
+    TooManyRequests(String),
 }
 
 impl AdmissionError {
@@ -81,6 +85,27 @@ impl AdmissionError {
     /// Create an Internal error.
     pub fn internal_error(msg: impl Into<String>) -> Self {
         AdmissionError::Internal(msg.into())
+    }
+
+    /// Create a not ready error.
+    pub fn not_ready(plugin: impl Into<String>) -> Self {
+        AdmissionError::BadRequest(format!("{} not yet ready to handle request", plugin.into()))
+    }
+
+    /// Create an invalid error with a message.
+    pub fn invalid(plugin: impl Into<String>, msg: impl Into<String>) -> Self {
+        AdmissionError::BadRequest(format!("{}: {}", plugin.into(), msg.into()))
+    }
+
+    /// Create a TooManyRequests error (HTTP 429).
+    pub fn too_many_requests(msg: impl Into<String>) -> Self {
+        AdmissionError::TooManyRequests(msg.into())
+    }
+
+    /// Create a simple Forbidden error with just a message.
+    /// This is a convenience method for cases where full resource details are not needed.
+    pub fn forbidden_msg(msg: impl Into<String>) -> Self {
+        AdmissionError::BadRequest(format!("Forbidden: {}", msg.into()))
     }
 }
 

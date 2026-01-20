@@ -262,6 +262,8 @@ mod tests {
         let handler = AlwaysPullImages::new();
 
         let pod = Pod { annotations: std::collections::HashMap::new(),
+            labels: std::collections::HashMap::new(),
+            node_name: None,
             name: "123".to_string(),
             namespace: "test".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
@@ -338,6 +340,8 @@ mod tests {
         let handler = AlwaysPullImages::new();
 
         let pod = Pod { annotations: std::collections::HashMap::new(),
+            labels: std::collections::HashMap::new(),
+            node_name: None,
             name: "123".to_string(),
             namespace: "test".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
@@ -400,6 +404,8 @@ mod tests {
     #[test]
     fn test_other_resources() {
         let pod = Pod { annotations: std::collections::HashMap::new(),
+            labels: std::collections::HashMap::new(),
+            node_name: None,
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
@@ -508,6 +514,8 @@ mod tests {
     #[test]
     fn test_update_pod() {
         let old_pod = Pod { annotations: std::collections::HashMap::new(),
+            labels: std::collections::HashMap::new(),
+            node_name: None,
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
@@ -524,6 +532,8 @@ mod tests {
 
         // Only add new annotation (no image change)
         let pod = Pod { annotations: std::collections::HashMap::new(),
+            labels: std::collections::HashMap::new(),
+            node_name: None,
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
@@ -540,6 +550,8 @@ mod tests {
 
         // Add new label and change image
         let pod_with_new_image = Pod { annotations: std::collections::HashMap::new(),
+            labels: std::collections::HashMap::new(),
+            node_name: None,
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
             spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(), priority_class_name: String::new(), priority: None, preemption_policy: None,
