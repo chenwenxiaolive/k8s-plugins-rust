@@ -456,7 +456,7 @@ mod tests {
                     GroupVersionResource::new("", "version", tc.resource),
                     tc.subresource,
                     Operation::Create,
-                    Some(Box::new(Service {
+                    Some(Box::new(Service { spec: crate::api::core::ServiceSpec::default(),
                         name: "test".to_string(),
                         namespace: "default".to_string(),
                     })),

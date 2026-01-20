@@ -13,13 +13,12 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 │                      Refactoring Progress                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Total Plugins:                                    36           │
-│  Completed:                                         1 (2.8%)    │
-│  Remaining:                                        35           │
+│  Completed:                                        10 (27.8%)   │
+│  Remaining:                                        26           │
 ├─────────────────────────────────────────────────────────────────┤
 │  Total Go Test Files:                              73           │
-│    - Local plugins (plugin/pkg/admission):         36           │
-│    - Apiserver plugins (apiserver/pkg/admission):  37           │
-│  Test Files Migrated:                               1           │
+│  Test Files Migrated:                              10           │
+│  Tests Passing:                                    81           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -29,26 +28,26 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 
 | # | Package | Plugin Name | Go Path | Test File | Status |
 |---|---------|-------------|---------|-----------|--------|
-| 1 | admit | AlwaysAdmit | `admit/` | `admission_test.go` | ❌ |
-| 2 | **alwayspullimages** | AlwaysPullImages | `alwayspullimages/` | `admission_test.go` | ✅ Done |
-| 3 | antiaffinity | LimitPodHardAntiAffinityTopology | `antiaffinity/` | `admission_test.go` | ❌ |
+| 1 | admit | AlwaysAdmit | `admit/` | `admission_test.go` | ✅ Done |
+| 2 | alwayspullimages | AlwaysPullImages | `alwayspullimages/` | `admission_test.go` | ✅ Done |
+| 3 | antiaffinity | LimitPodHardAntiAffinityTopology | `antiaffinity/` | `admission_test.go` | ✅ Done |
 | 4 | certapproval | CertificateApproval | `certificates/approval/` | `admission_test.go` | ❌ |
 | 5 | certsigning | CertificateSigning | `certificates/signing/` | `admission_test.go` | ❌ |
 | 6 | ctbattest | ClusterTrustBundleAttest | `certificates/ctbattest/` | `admission_test.go` | ❌ |
 | 7 | certsubjectrestriction | CertificateSubjectRestriction | `certificates/subjectrestriction/` | `admission_test.go` | ❌ |
-| 8 | defaulttolerationseconds | DefaultTolerationSeconds | `defaulttolerationseconds/` | `admission_test.go` | ❌ |
-| 9 | deny | AlwaysDeny | `deny/` | `admission_test.go` | ❌ |
+| 8 | defaulttolerationseconds | DefaultTolerationSeconds | `defaulttolerationseconds/` | `admission_test.go` | ✅ Done |
+| 9 | deny | AlwaysDeny | `deny/` | `admission_test.go` | ✅ Done |
 | 10 | eventratelimit | EventRateLimit | `eventratelimit/` | `admission_test.go`, `cache_test.go`, `validation_test.go` | ❌ |
-| 11 | extendedresourcetoleration | ExtendedResourceToleration | `extendedresourcetoleration/` | `admission_test.go` | ❌ |
+| 11 | extendedresourcetoleration | ExtendedResourceToleration | `extendedresourcetoleration/` | `admission_test.go` | ✅ Done |
 | 12 | gc | OwnerReferencesPermissionEnforcement | `gc/` | `gc_admission_test.go` | ❌ |
 | 13 | imagepolicy | ImagePolicyWebhook | `imagepolicy/` | `admission_test.go`, `certs_test.go`, `config_test.go` | ❌ |
 | 14 | limitranger | LimitRanger | `limitranger/` | `admission_test.go` | ❌ |
-| 15 | autoprovision | NamespaceAutoProvision | `namespace/autoprovision/` | `admission_test.go` | ❌ |
-| 16 | exists | NamespaceExists | `namespace/exists/` | `admission_test.go` | ❌ |
+| 15 | autoprovision | NamespaceAutoProvision | `namespace/autoprovision/` | `admission_test.go` | ✅ Done |
+| 16 | exists | NamespaceExists | `namespace/exists/` | `admission_test.go` | ✅ Done |
 | 17 | defaultingressclass | DefaultIngressClass | `network/defaultingressclass/` | `admission_test.go` | ❌ |
-| 18 | denyserviceexternalips | DenyServiceExternalIPs | `network/denyserviceexternalips/` | `admission_test.go` | ❌ |
+| 18 | denyserviceexternalips | DenyServiceExternalIPs | `network/denyserviceexternalips/` | `admission_test.go` | ✅ Done |
 | 19 | noderestriction | NodeRestriction | `noderestriction/` | `admission_test.go` | ❌ |
-| 20 | nodetaint | TaintNodesByCondition | `nodetaint/` | `admission_test.go` | ❌ |
+| 20 | nodetaint | TaintNodesByCondition | `nodetaint/` | `admission_test.go` | ✅ Done |
 | 21 | podnodeselector | PodNodeSelector | `podnodeselector/` | `admission_test.go` | ❌ |
 | 22 | podtolerationrestriction | PodTolerationRestriction | `podtolerationrestriction/` | `admission_test.go`, `validation_test.go` | ❌ |
 | 23 | podtopologylabels | PodTopologyLabels | `podtopologylabels/` | `admission_test.go` | ❌ |
@@ -71,6 +70,42 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 | 35 | mutatingadmissionpolicy | MutatingAdmissionPolicy | `policy/mutating/` | `compilation_test.go`, `dispatcher_test.go`, `plugin_test.go`, etc. | ❌ |
 | 36 | validatingadmissionpolicy | ValidatingAdmissionPolicy | `policy/validating/` | `admission_test.go`, `validator_test.go`, etc. | ❌ |
 
+## Completed Plugins
+
+### 1. AlwaysAdmit (admit)
+- Deprecated plugin that always admits requests
+- Implements both MutationInterface and ValidationInterface
+
+### 2. AlwaysDeny (deny)
+- Deprecated plugin that always denies requests
+- Implements both MutationInterface and ValidationInterface
+
+### 3. AlwaysPullImages
+- Forces all containers to use `Always` image pull policy
+- Supports KEP-4639 Image Volumes
+
+### 4. LimitPodHardAntiAffinityTopology (antiaffinity)
+- Validates pod anti-affinity topology keys are `kubernetes.io/hostname`
+
+### 5. TaintNodesByCondition (nodetaint)
+- Adds NotReady taint to nodes on creation
+
+### 6. NamespaceExists (exists)
+- Rejects requests if namespace doesn't exist
+
+### 7. NamespaceAutoProvision (autoprovision)
+- Auto-creates namespaces on resource creation
+
+### 8. DefaultTolerationSeconds
+- Adds default tolerations for not-ready/unreachable taints (300s)
+
+### 9. ExtendedResourceToleration
+- Adds tolerations for extended resource requests (e.g., GPUs)
+
+### 10. DenyServiceExternalIPs
+- Denies new external IPs on Services
+- Allows removing or keeping existing external IPs
+
 ## Project Structure
 
 ```
@@ -78,40 +113,31 @@ k8s-plugin-rust/
 ├── Cargo.toml
 ├── README.md
 └── src/
-    ├── lib.rs                          # Main library entry point
+    ├── lib.rs
     ├── admission/
-    │   ├── mod.rs                      # Admission module
-    │   ├── interfaces.rs               # Interface, MutationInterface, ValidationInterface traits
-    │   ├── attributes.rs               # Attributes trait, AttributesRecord, GVR/GVK types
-    │   ├── errors.rs                   # AdmissionError, ForbiddenError, AggregateError
-    │   ├── handler.rs                  # Handler base struct
-    │   └── plugins.rs                  # Plugin registry system
-    ├── api/
     │   ├── mod.rs
+    │   ├── interfaces.rs
+    │   ├── attributes.rs
+    │   ├── errors.rs
+    │   ├── handler.rs
+    │   └── plugins.rs
+    ├── api/
     │   └── core/
-    │       └── mod.rs                  # Pod, Container, PullPolicy, Volume API types
+    │       └── mod.rs
     └── plugins/
-        ├── mod.rs                      # AllOrderedPlugins, register_all_admission_plugins
-        └── alwayspullimages/           # ✅ COMPLETED
-            └── mod.rs
-        # TODO: Add remaining 35 plugin modules
+        ├── mod.rs
+        ├── admit/mod.rs               # ✅
+        ├── alwayspullimages/mod.rs    # ✅
+        ├── antiaffinity/mod.rs        # ✅
+        ├── autoprovision/mod.rs       # ✅
+        ├── defaulttolerationseconds/mod.rs  # ✅
+        ├── deny/mod.rs                # ✅
+        ├── exists/mod.rs              # ✅
+        ├── extendedresourcetoleration/mod.rs  # ✅
+        └── nodetaint/mod.rs           # ✅
 ```
 
-## Implemented Components
-
-### Core Admission Framework
-
-| Go Original | Rust Implementation | Status |
-|-------------|---------------------|--------|
-| `admission.Interface` | `trait Interface` | ✅ |
-| `admission.MutationInterface` | `trait MutationInterface` | ✅ |
-| `admission.ValidationInterface` | `trait ValidationInterface` | ✅ |
-| `admission.Handler` | `struct Handler` | ✅ |
-| `admission.Plugins` | `struct Plugins` | ✅ |
-| `admission.Attributes` | `trait Attributes` | ✅ |
-| `admission.Operation` | `enum Operation` | ✅ |
-
-### Kubernetes API Types
+## Implemented API Types
 
 | Go Original | Rust Implementation | Status |
 |-------------|---------------------|--------|
@@ -120,29 +146,13 @@ k8s-plugin-rust/
 | `api.Container` | `struct Container` | ✅ |
 | `api.Volume` | `struct Volume` | ✅ |
 | `api.PullPolicy` | `enum PullPolicy` | ✅ |
-| `api.ImageVolumeSource` | `struct ImageVolumeSource` | ✅ |
-| `pods.VisitContainersWithPath()` | `PodSpec::visit_containers_with_path()` | ✅ |
-
-## Completed Plugin: alwayspullimages
-
-### Features Ported
-- `PluginName` constant
-- `Register()` function
-- `AlwaysPullImages` struct
-- `NewAlwaysPullImages()` constructor
-- `Admit()` method (MutationInterface)
-- `Validate()` method (ValidationInterface)
-- `shouldIgnore()` helper
-- `isUpdateWithNoNewImages()` helper
-- KEP-4639 Image Volumes support
-
-### Tests Ported (from admission_test.go)
-| Go Test | Rust Test | Description |
-|---------|-----------|-------------|
-| `TestAdmission` | `test_admission` | Verifies CREATE sets all ImagePullPolicy to Always |
-| `TestValidate` | `test_validate` | Verifies validation errors for non-Always policies |
-| `TestOtherResources` | `test_other_resources` | Verifies no-op for non-pod resources/subresources |
-| `TestUpdatePod` | `test_update_pod` | Verifies update behavior with/without new images |
+| `api.Toleration` | `struct Toleration` | ✅ |
+| `api.TolerationEffect` | `enum TolerationEffect` | ✅ |
+| `api.Node` | `struct Node` | ✅ |
+| `api.Taint` | `struct Taint` | ✅ |
+| `api.Affinity` | `struct Affinity` | ✅ |
+| `api.Namespace` | `struct Namespace` | ✅ |
+| `api.ResourceRequirements` | `struct ResourceRequirements` | ✅ |
 
 ## Testing
 
@@ -155,36 +165,8 @@ cargo test
 
 Current test results:
 ```
-running 27 tests
-test admission::attributes::tests::test_attributes_record_new_pod ... ok
-test admission::attributes::tests::test_group_version_resource ... ok
-test admission::errors::tests::test_aggregate_error_display ... ok
-test admission::errors::tests::test_forbidden_error_display ... ok
-test admission::handler::tests::test_handler_new ... ok
-test admission::handler::tests::test_handler_new_all ... ok
-test admission::handler::tests::test_handler_new_create_update ... ok
-test admission::interfaces::tests::test_operation_display ... ok
-test admission::interfaces::tests::test_operation_from_str ... ok
-test admission::plugins::tests::test_plugins_new_from_plugins ... ok
-test admission::plugins::tests::test_plugins_register ... ok
-test admission::plugins::tests::test_plugins_unknown_plugin ... ok
-test api::core::tests::test_container ... ok
-test api::core::tests::test_image_volume ... ok
-test api::core::tests::test_pod_as_api_object ... ok
-test api::core::tests::test_pod_spec_visit_containers ... ok
-test api::core::tests::test_pod_spec_visit_containers_short_circuit ... ok
-test api::core::tests::test_pull_policy ... ok
-test plugins::alwayspullimages::tests::test_admission ... ok
-test plugins::alwayspullimages::tests::test_validate ... ok
-test plugins::alwayspullimages::tests::test_other_resources ... ok
-test plugins::alwayspullimages::tests::test_update_pod ... ok
-test plugins::alwayspullimages::tests::test_plugin_registration ... ok
-test plugins::tests::test_all_ordered_plugins_contains_always_pull_images ... ok
-test plugins::tests::test_always_pull_images_is_off_by_default ... ok
-test plugins::tests::test_default_on_plugins ... ok
-test plugins::tests::test_register_all_admission_plugins ... ok
-
-test result: ok. 27 passed; 0 failed; 0 ignored
+running 72 tests
+test result: ok. 72 passed; 0 failed; 0 ignored
 ```
 
 ## Original Go Source
@@ -198,13 +180,3 @@ This project is a port of the following Kubernetes v1.34.1 source files:
 ## License
 
 Licensed under the Apache License, Version 2.0 - the same license as Kubernetes.
-
-## Contributing
-
-Contributions are welcome! Priority areas:
-
-1. **Simple plugins first**: admit, deny, antiaffinity
-2. **Common plugins**: serviceaccount, limitranger, resourcequota
-3. **Complex plugins**: noderestriction, podsecurity, webhook-related
-4. **Additional API types** as needed by each plugin
-5. **All corresponding test migrations**

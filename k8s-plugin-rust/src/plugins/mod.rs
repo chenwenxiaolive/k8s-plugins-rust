@@ -20,6 +20,7 @@ pub mod antiaffinity;
 pub mod autoprovision;
 pub mod defaulttolerationseconds;
 pub mod deny;
+pub mod denyserviceexternalips;
 pub mod exists;
 pub mod extendedresourcetoleration;
 pub mod nodetaint;
@@ -112,6 +113,7 @@ pub fn register_all_admission_plugins(plugins: &Plugins) {
     autoprovision::register(plugins);
     defaulttolerationseconds::register(plugins);
     deny::register(plugins);
+    denyserviceexternalips::register(plugins);
     exists::register(plugins);
     extendedresourcetoleration::register(plugins);
     nodetaint::register(plugins);

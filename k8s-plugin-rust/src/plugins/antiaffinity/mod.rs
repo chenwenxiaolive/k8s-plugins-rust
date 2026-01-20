@@ -376,7 +376,7 @@ mod tests {
                 kind: "Pod",
                 resource: "pods",
                 subresource: "",
-                object: Box::new(crate::api::core::Service {
+                object: Box::new(crate::api::core::Service { spec: crate::api::core::ServiceSpec::default(),
                     name: name.to_string(),
                     namespace: namespace.to_string(),
                 }),

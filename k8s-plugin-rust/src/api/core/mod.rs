@@ -715,6 +715,34 @@ impl ApiObject for Namespace {
 pub struct Service {
     pub name: String,
     pub namespace: String,
+    pub spec: ServiceSpec,
+}
+
+impl Service {
+    /// Create a new service with the given name and namespace.
+    pub fn new(name: &str, namespace: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            namespace: namespace.to_string(),
+            spec: ServiceSpec::default(),
+        }
+    }
+
+    /// Create a new service with external IPs.
+    pub fn with_external_ips(name: &str, namespace: &str, external_ips: Vec<String>) -> Self {
+        Self {
+            name: name.to_string(),
+            namespace: namespace.to_string(),
+            spec: ServiceSpec { external_ips },
+        }
+    }
+}
+
+/// ServiceSpec represents the specification of a service.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct ServiceSpec {
+    /// List of external IPs.
+    pub external_ips: Vec<String>,
 }
 
 impl ApiObject for Service {
