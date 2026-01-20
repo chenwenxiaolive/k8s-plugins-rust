@@ -51,11 +51,15 @@ impl ValidationInterface for Plugin {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::admission::attributes::{AttributesRecord, GroupVersionKind, GroupVersionResource};
 
     #[test]
     fn test_handles() {
-        let handler = Plugin::new();
-        assert!(handler.handles(Operation::Create));
+        let plugin = Plugin::new();
+        assert!(plugin.handles(Operation::Create));
+        assert!(plugin.handles(Operation::Update));
+        assert!(!plugin.handles(Operation::Delete));
+        assert!(!plugin.handles(Operation::Connect));
     }
 
     #[test]
@@ -63,5 +67,101 @@ mod tests {
         let plugins = Plugins::new();
         register(&plugins);
         assert!(plugins.is_registered(PLUGIN_NAME));
+    }
+
+    #[test]
+    fn test_ignores_non_pod_resources() {
+        let plugin = Plugin::new();
+        let attrs = AttributesRecord::new(
+            "test",
+            "default",
+            GroupVersionResource::new("", "v1", "services"),
+            "",
+            Operation::Create,
+            None,
+            None,
+            GroupVersionKind::new("", "v1", "Service"),
+            false,
+        );
+        let result = plugin.validate(&attrs);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_validates_pod_resources() {
+        let plugin = Plugin::new();
+        let attrs = AttributesRecord::new(
+            "test",
+            "default",
+            GroupVersionResource::new("", "v1", "pods"),
+            "",
+            Operation::Create,
+            None,
+            None,
+            GroupVersionKind::new("", "v1", "Pod"),
+            false,
+        );
+        let result = plugin.validate(&attrs);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_handles_update_operation() {
+        let plugin = Plugin::new();
+        let attrs = AttributesRecord::new(
+            "test",
+            "default",
+            GroupVersionResource::new("", "v1", "pods"),
+            "",
+            Operation::Update,
+            None,
+            None,
+            GroupVersionKind::new("", "v1", "Pod"),
+            false,
+        );
+        let result = plugin.validate(&attrs);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_ignores_configmaps() {
+        let plugin = Plugin::new();
+        let attrs = AttributesRecord::new(
+            "test",
+            "default",
+            GroupVersionResource::new("", "v1", "configmaps"),
+            "",
+            Operation::Create,
+            None,
+            None,
+            GroupVersionKind::new("", "v1", "ConfigMap"),
+            false,
+        );
+        let result = plugin.validate(&attrs);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_ignores_secrets() {
+        let plugin = Plugin::new();
+        let attrs = AttributesRecord::new(
+            "test",
+            "default",
+            GroupVersionResource::new("", "v1", "secrets"),
+            "",
+            Operation::Create,
+            None,
+            None,
+            GroupVersionKind::new("", "v1", "Secret"),
+            false,
+        );
+        let result = plugin.validate(&attrs);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_default_trait() {
+        let plugin = Plugin::default();
+        assert!(plugin.handles(Operation::Create));
     }
 }

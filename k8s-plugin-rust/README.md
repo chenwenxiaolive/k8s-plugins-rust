@@ -177,8 +177,8 @@ cargo test
 
 Current test results:
 ```
-running 177 tests
-test result: ok. 177 passed; 0 failed; 0 ignored
+running 201 tests
+test result: ok. 201 passed; 0 failed; 0 ignored
 ```
 
 ## Original Go Source

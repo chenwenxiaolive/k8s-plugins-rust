@@ -47,13 +47,15 @@ impl ValidationInterface for Plugin {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::admission::attributes::{AttributesRecord, GroupVersionKind, GroupVersionResource};
 
     #[test]
     fn test_handles() {
-        let handler = Plugin::new();
-        assert!(handler.handles(Operation::Create));
-        assert!(handler.handles(Operation::Update));
-        assert!(handler.handles(Operation::Delete));
+        let plugin = Plugin::new();
+        assert!(plugin.handles(Operation::Create));
+        assert!(plugin.handles(Operation::Update));
+        assert!(plugin.handles(Operation::Delete));
+        assert!(!plugin.handles(Operation::Connect));
     }
 
     #[test]
@@ -61,5 +63,47 @@ mod tests {
         let plugins = Plugins::new();
         register(&plugins);
         assert!(plugins.is_registered(PLUGIN_NAME));
+    }
+
+    #[test]
+    fn test_validate_pods() {
+        let plugin = Plugin::new();
+        let attrs = AttributesRecord::new(
+            "test-pod",
+            "default",
+            GroupVersionResource::new("", "v1", "pods"),
+            "",
+            Operation::Create,
+            None,
+            None,
+            GroupVersionKind::new("", "v1", "Pod"),
+            false,
+        );
+        let result = plugin.validate(&attrs);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_validate_nodes() {
+        let plugin = Plugin::new();
+        let attrs = AttributesRecord::new(
+            "test-node",
+            "",
+            GroupVersionResource::new("", "v1", "nodes"),
+            "",
+            Operation::Update,
+            None,
+            None,
+            GroupVersionKind::new("", "v1", "Node"),
+            false,
+        );
+        let result = plugin.validate(&attrs);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_default_trait() {
+        let plugin = Plugin::default();
+        assert!(plugin.handles(Operation::Create));
     }
 }

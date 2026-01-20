@@ -50,11 +50,15 @@ impl MutationInterface for Plugin {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::admission::attributes::{AttributesRecord, GroupVersionKind, GroupVersionResource};
 
     #[test]
     fn test_handles() {
-        let handler = Plugin::new();
-        assert!(handler.handles(Operation::Create));
+        let plugin = Plugin::new();
+        assert!(plugin.handles(Operation::Create));
+        assert!(!plugin.handles(Operation::Update));
+        assert!(!plugin.handles(Operation::Delete));
+        assert!(!plugin.handles(Operation::Connect));
     }
 
     #[test]
@@ -62,5 +66,65 @@ mod tests {
         let plugins = Plugins::new();
         register(&plugins);
         assert!(plugins.is_registered(PLUGIN_NAME));
+    }
+
+    #[test]
+    fn test_ignores_non_pod_resources() {
+        let plugin = Plugin::new();
+        let mut attrs = AttributesRecord::new(
+            "test",
+            "default",
+            GroupVersionResource::new("", "v1", "services"),
+            "",
+            Operation::Create,
+            None,
+            None,
+            GroupVersionKind::new("", "v1", "Service"),
+            false,
+        );
+        let result = plugin.admit(&mut attrs);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_admits_pod_resources() {
+        let plugin = Plugin::new();
+        let mut attrs = AttributesRecord::new(
+            "test",
+            "default",
+            GroupVersionResource::new("", "v1", "pods"),
+            "",
+            Operation::Create,
+            None,
+            None,
+            GroupVersionKind::new("", "v1", "Pod"),
+            false,
+        );
+        let result = plugin.admit(&mut attrs);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_ignores_deployments() {
+        let plugin = Plugin::new();
+        let mut attrs = AttributesRecord::new(
+            "test",
+            "default",
+            GroupVersionResource::new("apps", "v1", "deployments"),
+            "",
+            Operation::Create,
+            None,
+            None,
+            GroupVersionKind::new("apps", "v1", "Deployment"),
+            false,
+        );
+        let result = plugin.admit(&mut attrs);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_default_trait() {
+        let plugin = Plugin::default();
+        assert!(plugin.handles(Operation::Create));
     }
 }
