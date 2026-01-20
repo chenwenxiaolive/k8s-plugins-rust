@@ -245,7 +245,7 @@ mod tests {
         let pod = Pod {
             name: "test-pod".to_string(),
             namespace: "default".to_string(),
-            spec: PodSpec { affinity: None,
+            spec: PodSpec { affinity: None, tolerations: vec![],
                 init_containers: vec![],
                 containers: vec![Container {
                     name: "test".to_string(),

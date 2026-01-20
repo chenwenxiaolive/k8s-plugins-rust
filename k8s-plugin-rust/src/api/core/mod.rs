@@ -40,6 +40,129 @@ pub const LABEL_HOSTNAME: &str = "kubernetes.io/hostname";
 /// Taint key for node not ready.
 pub const TAINT_NODE_NOT_READY: &str = "node.kubernetes.io/not-ready";
 
+/// Taint key for node unreachable.
+pub const TAINT_NODE_UNREACHABLE: &str = "node.kubernetes.io/unreachable";
+
+// ============================================================================
+// Toleration Types
+// ============================================================================
+
+/// TolerationOperator represents an operator for toleration matching.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub enum TolerationOperator {
+    /// Exists means the key exists, regardless of value.
+    #[default]
+    Exists,
+    /// Equal means the key/value must match exactly.
+    Equal,
+}
+
+impl TolerationOperator {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            TolerationOperator::Exists => "Exists",
+            TolerationOperator::Equal => "Equal",
+        }
+    }
+}
+
+/// Toleration represents a toleration that a pod can have.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Toleration {
+    /// Key is the taint key that the toleration applies to.
+    pub key: String,
+    /// Operator represents a key's relationship to the value.
+    pub operator: TolerationOperator,
+    /// Value is the taint value the toleration matches to.
+    pub value: String,
+    /// Effect indicates the taint effect to match.
+    pub effect: Option<TolerationEffect>,
+    /// TolerationSeconds represents the period of time the toleration tolerates the taint.
+    pub toleration_seconds: Option<i64>,
+}
+
+impl Toleration {
+    /// Create a new toleration.
+    pub fn new(key: &str, operator: TolerationOperator, effect: Option<TolerationEffect>) -> Self {
+        Self {
+            key: key.to_string(),
+            operator,
+            value: String::new(),
+            effect,
+            toleration_seconds: None,
+        }
+    }
+
+    /// Create a new toleration with toleration seconds.
+    pub fn with_seconds(
+        key: &str,
+        operator: TolerationOperator,
+        effect: Option<TolerationEffect>,
+        seconds: i64,
+    ) -> Self {
+        Self {
+            key: key.to_string(),
+            operator,
+            value: String::new(),
+            effect,
+            toleration_seconds: Some(seconds),
+        }
+    }
+
+    /// Check if this toleration matches a taint key and effect.
+    pub fn matches_taint(&self, key: &str, effect: TolerationEffect) -> bool {
+        // Empty key with Exists operator matches all taints
+        if self.key.is_empty() && self.operator == TolerationOperator::Exists {
+            // Empty effect matches all effects, or specific effect must match
+            return self.effect.is_none() || self.effect == Some(effect);
+        }
+
+        // Key must match
+        if self.key != key {
+            return false;
+        }
+
+        // Effect must match (empty effect matches all)
+        if let Some(ref toleration_effect) = self.effect {
+            if *toleration_effect != effect {
+                return false;
+            }
+        }
+
+        true
+    }
+}
+
+impl Default for Toleration {
+    fn default() -> Self {
+        Self {
+            key: String::new(),
+            operator: TolerationOperator::Exists,
+            value: String::new(),
+            effect: None,
+            toleration_seconds: None,
+        }
+    }
+}
+
+/// TolerationEffect describes the effect of a toleration.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TolerationEffect {
+    NoSchedule,
+    PreferNoSchedule,
+    NoExecute,
+}
+
+impl TolerationEffect {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            TolerationEffect::NoSchedule => "NoSchedule",
+            TolerationEffect::PreferNoSchedule => "PreferNoSchedule",
+            TolerationEffect::NoExecute => "NoExecute",
+        }
+    }
+}
+
 // ============================================================================
 // PullPolicy
 // ============================================================================
@@ -263,6 +386,8 @@ pub struct PodSpec {
     pub volumes: Vec<Volume>,
     /// Affinity scheduling rules.
     pub affinity: Option<Affinity>,
+    /// List of tolerations.
+    pub tolerations: Vec<Toleration>,
 }
 
 impl PodSpec {
@@ -616,6 +741,7 @@ mod tests {
             ephemeral_containers: vec![],
             volumes: vec![],
             affinity: None,
+            tolerations: vec![],
         };
 
         let mut visited = vec![];
@@ -641,6 +767,7 @@ mod tests {
             ephemeral_containers: vec![],
             volumes: vec![],
             affinity: None,
+            tolerations: vec![],
         };
 
         let mut count = 0;

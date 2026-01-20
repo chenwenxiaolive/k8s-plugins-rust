@@ -264,7 +264,7 @@ mod tests {
         let pod = Pod {
             name: "123".to_string(),
             namespace: "test".to_string(),
-            spec: PodSpec { affinity: None,
+            spec: PodSpec { affinity: None, tolerations: vec![],
                 init_containers: vec![
                     Container::new("init1", "image"),
                     Container::with_pull_policy("init2", "image", PullPolicy::Never),
@@ -340,7 +340,7 @@ mod tests {
         let pod = Pod {
             name: "123".to_string(),
             namespace: "test".to_string(),
-            spec: PodSpec { affinity: None,
+            spec: PodSpec { affinity: None, tolerations: vec![],
                 init_containers: vec![
                     Container::new("init1", "image"), // Empty policy
                     Container::with_pull_policy("init2", "image", PullPolicy::Never),
@@ -402,7 +402,7 @@ mod tests {
         let pod = Pod {
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
-            spec: PodSpec { affinity: None,
+            spec: PodSpec { affinity: None, tolerations: vec![],
                 init_containers: vec![],
                 containers: vec![Container::with_pull_policy("ctr2", "image", PullPolicy::Never)],
                 ephemeral_containers: vec![],
@@ -510,7 +510,7 @@ mod tests {
         let old_pod = Pod {
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
-            spec: PodSpec { affinity: None,
+            spec: PodSpec { affinity: None, tolerations: vec![],
                 init_containers: vec![],
                 containers: vec![Container::with_pull_policy(
                     "ctr2",
@@ -526,7 +526,7 @@ mod tests {
         let pod = Pod {
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
-            spec: PodSpec { affinity: None,
+            spec: PodSpec { affinity: None, tolerations: vec![],
                 init_containers: vec![],
                 containers: vec![Container::with_pull_policy(
                     "ctr2",
@@ -542,7 +542,7 @@ mod tests {
         let pod_with_new_image = Pod {
             name: "testname".to_string(),
             namespace: "testnamespace".to_string(),
-            spec: PodSpec { affinity: None,
+            spec: PodSpec { affinity: None, tolerations: vec![],
                 init_containers: vec![],
                 containers: vec![Container::with_pull_policy(
                     "ctr2",
