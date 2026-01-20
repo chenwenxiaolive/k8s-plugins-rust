@@ -18,6 +18,7 @@ pub mod admit;
 pub mod alwayspullimages;
 pub mod antiaffinity;
 pub mod autoprovision;
+pub mod certsubjectrestriction;
 pub mod defaulttolerationseconds;
 pub mod deny;
 pub mod denyserviceexternalips;
@@ -111,6 +112,7 @@ pub fn register_all_admission_plugins(plugins: &Plugins) {
     alwayspullimages::register(plugins);
     antiaffinity::register(plugins);
     autoprovision::register(plugins);
+    certsubjectrestriction::register(plugins);
     defaulttolerationseconds::register(plugins);
     deny::register(plugins);
     denyserviceexternalips::register(plugins);

@@ -13,12 +13,12 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 │                      Refactoring Progress                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Total Plugins:                                    36           │
-│  Completed:                                        10 (27.8%)   │
-│  Remaining:                                        26           │
+│  Completed:                                        11 (30.6%)   │
+│  Remaining:                                        25           │
 ├─────────────────────────────────────────────────────────────────┤
 │  Total Go Test Files:                              73           │
-│  Test Files Migrated:                              10           │
-│  Tests Passing:                                    81           │
+│  Test Files Migrated:                              11           │
+│  Tests Passing:                                    88           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -34,7 +34,7 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 | 4 | certapproval | CertificateApproval | `certificates/approval/` | `admission_test.go` | ❌ |
 | 5 | certsigning | CertificateSigning | `certificates/signing/` | `admission_test.go` | ❌ |
 | 6 | ctbattest | ClusterTrustBundleAttest | `certificates/ctbattest/` | `admission_test.go` | ❌ |
-| 7 | certsubjectrestriction | CertificateSubjectRestriction | `certificates/subjectrestriction/` | `admission_test.go` | ❌ |
+| 7 | certsubjectrestriction | CertificateSubjectRestriction | `certificates/subjectrestriction/` | `admission_test.go` | ✅ Done |
 | 8 | defaulttolerationseconds | DefaultTolerationSeconds | `defaulttolerationseconds/` | `admission_test.go` | ✅ Done |
 | 9 | deny | AlwaysDeny | `deny/` | `admission_test.go` | ✅ Done |
 | 10 | eventratelimit | EventRateLimit | `eventratelimit/` | `admission_test.go`, `cache_test.go`, `validation_test.go` | ❌ |
