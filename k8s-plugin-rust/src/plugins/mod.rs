@@ -17,6 +17,7 @@
 pub mod admit;
 pub mod alwayspullimages;
 pub mod antiaffinity;
+pub mod autoprovision;
 pub mod deny;
 pub mod exists;
 pub mod nodetaint;
@@ -106,6 +107,7 @@ pub fn register_all_admission_plugins(plugins: &Plugins) {
     admit::register(plugins);
     alwayspullimages::register(plugins);
     antiaffinity::register(plugins);
+    autoprovision::register(plugins);
     deny::register(plugins);
     exists::register(plugins);
     nodetaint::register(plugins);
