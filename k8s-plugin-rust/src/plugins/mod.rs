@@ -16,7 +16,10 @@
 
 pub mod admit;
 pub mod alwayspullimages;
+pub mod antiaffinity;
 pub mod deny;
+pub mod exists;
+pub mod nodetaint;
 
 use crate::admission::Plugins;
 
@@ -102,7 +105,10 @@ pub fn default_off_plugins() -> Vec<&'static str> {
 pub fn register_all_admission_plugins(plugins: &Plugins) {
     admit::register(plugins);
     alwayspullimages::register(plugins);
+    antiaffinity::register(plugins);
     deny::register(plugins);
+    exists::register(plugins);
+    nodetaint::register(plugins);
     // TODO: Register remaining plugins as they are implemented
 }
 

@@ -38,6 +38,10 @@ pub enum AdmissionError {
     /// Internal represents an internal error.
     #[error("internal error: {0}")]
     Internal(String),
+
+    /// NotFound indicates a resource was not found.
+    #[error("{kind} \"{name}\" not found")]
+    NotFound { kind: String, name: String },
 }
 
 impl AdmissionError {
@@ -64,6 +68,19 @@ impl AdmissionError {
     /// Create an aggregate error from multiple errors.
     pub fn aggregate(errors: Vec<AdmissionError>) -> Self {
         AdmissionError::Aggregate(AggregateError { errors })
+    }
+
+    /// Create a NotFound error.
+    pub fn not_found(kind: impl Into<String>, name: impl Into<String>) -> Self {
+        AdmissionError::NotFound {
+            kind: kind.into(),
+            name: name.into(),
+        }
+    }
+
+    /// Create an Internal error.
+    pub fn internal_error(msg: impl Into<String>) -> Self {
+        AdmissionError::Internal(msg.into())
     }
 }
 

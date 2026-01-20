@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Core Kubernetes API types (Pod, Container, Volume, etc.)
+//! Core Kubernetes API types (Pod, Container, Volume, Node, etc.)
 
 use std::any::Any;
 use std::collections::HashSet;
@@ -29,6 +29,20 @@ pub trait ApiObject: Send + Sync {
     /// Returns the kind of this object.
     fn kind(&self) -> &str;
 }
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+/// Label key for hostname topology.
+pub const LABEL_HOSTNAME: &str = "kubernetes.io/hostname";
+
+/// Taint key for node not ready.
+pub const TAINT_NODE_NOT_READY: &str = "node.kubernetes.io/not-ready";
+
+// ============================================================================
+// PullPolicy
+// ============================================================================
 
 /// PullPolicy describes a policy for if/when to pull a container image.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
@@ -73,6 +87,10 @@ impl fmt::Display for PullPolicy {
     }
 }
 
+// ============================================================================
+// Container
+// ============================================================================
+
 /// Container represents a single container in a pod.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Container {
@@ -104,6 +122,10 @@ impl Container {
     }
 }
 
+// ============================================================================
+// Volume Types
+// ============================================================================
+
 /// ImageVolumeSource represents a volume that is backed by an image.
 /// KEP-4639: https://kep.k8s.io/4639
 #[derive(Debug, Clone, PartialEq)]
@@ -129,7 +151,6 @@ impl ImageVolumeSource {
 pub struct VolumeSource {
     /// Image volume source (KEP-4639).
     pub image: Option<ImageVolumeSource>,
-    // Other volume sources would be added here (EmptyDir, HostPath, etc.)
 }
 
 /// Volume represents a volume in a pod.
@@ -161,6 +182,74 @@ impl Volume {
     }
 }
 
+// ============================================================================
+// Affinity Types
+// ============================================================================
+
+/// LabelSelectorOperator represents an operator for label selector requirements.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum LabelSelectorOperator {
+    In,
+    NotIn,
+    Exists,
+    DoesNotExist,
+}
+
+/// LabelSelectorRequirement is a selector that contains values, a key, and an operator.
+#[derive(Debug, Clone, PartialEq)]
+pub struct LabelSelectorRequirement {
+    pub key: String,
+    pub operator: LabelSelectorOperator,
+    pub values: Vec<String>,
+}
+
+/// LabelSelector is a label query over a set of resources.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct LabelSelector {
+    pub match_labels: std::collections::HashMap<String, String>,
+    pub match_expressions: Vec<LabelSelectorRequirement>,
+}
+
+/// PodAffinityTerm defines a set of pods for affinity/anti-affinity.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct PodAffinityTerm {
+    pub label_selector: Option<LabelSelector>,
+    pub topology_key: String,
+    pub namespaces: Vec<String>,
+}
+
+/// WeightedPodAffinityTerm is a weighted pod affinity term.
+#[derive(Debug, Clone, PartialEq)]
+pub struct WeightedPodAffinityTerm {
+    pub weight: i32,
+    pub pod_affinity_term: PodAffinityTerm,
+}
+
+/// PodAntiAffinity describes pod anti-affinity scheduling rules.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct PodAntiAffinity {
+    pub required_during_scheduling_ignored_during_execution: Vec<PodAffinityTerm>,
+    pub preferred_during_scheduling_ignored_during_execution: Vec<WeightedPodAffinityTerm>,
+}
+
+/// PodAffinity describes pod affinity scheduling rules.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct PodAffinity {
+    pub required_during_scheduling_ignored_during_execution: Vec<PodAffinityTerm>,
+    pub preferred_during_scheduling_ignored_during_execution: Vec<WeightedPodAffinityTerm>,
+}
+
+/// Affinity groups all affinity scheduling rules.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct Affinity {
+    pub pod_affinity: Option<PodAffinity>,
+    pub pod_anti_affinity: Option<PodAntiAffinity>,
+}
+
+// ============================================================================
+// PodSpec
+// ============================================================================
+
 /// PodSpec describes the specification of a pod.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct PodSpec {
@@ -172,6 +261,8 @@ pub struct PodSpec {
     pub ephemeral_containers: Vec<Container>,
     /// List of volumes.
     pub volumes: Vec<Volume>,
+    /// Affinity scheduling rules.
+    pub affinity: Option<Affinity>,
 }
 
 impl PodSpec {
@@ -181,7 +272,6 @@ impl PodSpec {
     }
 
     /// Visit all containers with their field paths.
-    /// Returns true if all visitors returned true, false if any returned false (short-circuit).
     pub fn visit_containers_with_path<F>(&self, base_path: &str, mut visitor: F) -> bool
     where
         F: FnMut(&Container, String) -> bool,
@@ -249,6 +339,10 @@ impl PodSpec {
     }
 }
 
+// ============================================================================
+// Pod
+// ============================================================================
+
 /// Pod represents a Kubernetes Pod.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Pod {
@@ -285,6 +379,170 @@ impl ApiObject for Pod {
     }
 }
 
+// ============================================================================
+// Node Types
+// ============================================================================
+
+/// TaintEffect describes the effect of a taint.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TaintEffect {
+    NoSchedule,
+    PreferNoSchedule,
+    NoExecute,
+}
+
+impl TaintEffect {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            TaintEffect::NoSchedule => "NoSchedule",
+            TaintEffect::PreferNoSchedule => "PreferNoSchedule",
+            TaintEffect::NoExecute => "NoExecute",
+        }
+    }
+}
+
+/// Taint represents a taint on a node.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Taint {
+    pub key: String,
+    pub value: String,
+    pub effect: TaintEffect,
+}
+
+impl Taint {
+    /// Create a new taint.
+    pub fn new(key: &str, effect: TaintEffect) -> Self {
+        Self {
+            key: key.to_string(),
+            value: String::new(),
+            effect,
+        }
+    }
+
+    /// Check if this taint matches another taint (by key and effect).
+    pub fn matches(&self, other: &Taint) -> bool {
+        self.key == other.key && self.effect == other.effect
+    }
+}
+
+/// NodeSpec describes the specification of a node.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct NodeSpec {
+    pub taints: Vec<Taint>,
+}
+
+/// ConditionStatus represents the status of a condition.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConditionStatus {
+    True,
+    False,
+    Unknown,
+}
+
+/// NodeConditionType represents the type of a node condition.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum NodeConditionType {
+    Ready,
+    MemoryPressure,
+    DiskPressure,
+    PIDPressure,
+    NetworkUnavailable,
+}
+
+/// NodeCondition represents a condition of a node.
+#[derive(Debug, Clone, PartialEq)]
+pub struct NodeCondition {
+    pub condition_type: NodeConditionType,
+    pub status: ConditionStatus,
+}
+
+/// NodeStatus represents the status of a node.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct NodeStatus {
+    pub conditions: Vec<NodeCondition>,
+}
+
+/// Node represents a Kubernetes Node.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Node {
+    pub name: String,
+    pub spec: NodeSpec,
+    pub status: NodeStatus,
+}
+
+impl Node {
+    /// Create a new node with the given name.
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            spec: NodeSpec::default(),
+            status: NodeStatus::default(),
+        }
+    }
+
+    /// Check if node has the given taint.
+    pub fn has_taint(&self, taint: &Taint) -> bool {
+        self.spec.taints.iter().any(|t| t.matches(taint))
+    }
+
+    /// Add a taint to the node if it doesn't already exist.
+    pub fn add_taint(&mut self, taint: Taint) {
+        if !self.has_taint(&taint) {
+            self.spec.taints.push(taint);
+        }
+    }
+}
+
+impl ApiObject for Node {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn kind(&self) -> &str {
+        "Node"
+    }
+}
+
+// ============================================================================
+// Namespace
+// ============================================================================
+
+/// Namespace represents a Kubernetes Namespace.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Namespace {
+    pub name: String,
+}
+
+impl Namespace {
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+        }
+    }
+}
+
+impl ApiObject for Namespace {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn kind(&self) -> &str {
+        "Namespace"
+    }
+}
+
+// ============================================================================
+// Service
+// ============================================================================
+
 /// Service represents a Kubernetes Service (for testing non-pod resources).
 #[derive(Debug, Clone, PartialEq)]
 pub struct Service {
@@ -306,10 +564,18 @@ impl ApiObject for Service {
     }
 }
 
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
 /// Helper to create a core API resource GroupResource.
 pub fn resource(name: &str) -> crate::admission::attributes::GroupResource {
     crate::admission::attributes::GroupResource::new("", name)
 }
+
+// ============================================================================
+// Tests
+// ============================================================================
 
 #[cfg(test)]
 mod tests {
@@ -349,6 +615,7 @@ mod tests {
             ],
             ephemeral_containers: vec![],
             volumes: vec![],
+            affinity: None,
         };
 
         let mut visited = vec![];
@@ -373,6 +640,7 @@ mod tests {
             ],
             ephemeral_containers: vec![],
             volumes: vec![],
+            affinity: None,
         };
 
         let mut count = 0;
@@ -405,5 +673,44 @@ mod tests {
         assert_eq!(vol.name, "my-image-vol");
         assert!(vol.volume_source.image.is_some());
         assert_eq!(vol.volume_source.image.unwrap().pull_policy, PullPolicy::Never);
+    }
+
+    #[test]
+    fn test_node_taints() {
+        let mut node = Node::new("test-node");
+        let taint = Taint::new(TAINT_NODE_NOT_READY, TaintEffect::NoSchedule);
+
+        assert!(!node.has_taint(&taint));
+
+        node.add_taint(taint.clone());
+        assert!(node.has_taint(&taint));
+        assert_eq!(node.spec.taints.len(), 1);
+
+        // Adding same taint again shouldn't duplicate
+        node.add_taint(taint.clone());
+        assert_eq!(node.spec.taints.len(), 1);
+    }
+
+    #[test]
+    fn test_affinity() {
+        let affinity = Affinity {
+            pod_anti_affinity: Some(PodAntiAffinity {
+                required_during_scheduling_ignored_during_execution: vec![
+                    PodAffinityTerm {
+                        topology_key: LABEL_HOSTNAME.to_string(),
+                        ..Default::default()
+                    }
+                ],
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        let anti_affinity = affinity.pod_anti_affinity.as_ref().unwrap();
+        assert_eq!(anti_affinity.required_during_scheduling_ignored_during_execution.len(), 1);
+        assert_eq!(
+            anti_affinity.required_during_scheduling_ignored_during_execution[0].topology_key,
+            LABEL_HOSTNAME
+        );
     }
 }
