@@ -245,7 +245,7 @@ mod tests {
         let pod = Pod { annotations: std::collections::HashMap::new(),
             name: "test-pod".to_string(),
             namespace: "default".to_string(),
-            spec: PodSpec { affinity: None, tolerations: vec![],
+            spec: PodSpec { affinity: None, tolerations: vec![], node_selector: std::collections::HashMap::new(),
                 init_containers: vec![],
                 containers: vec![Container {
                     name: "test".to_string(),

@@ -13,12 +13,12 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 │                      Refactoring Progress                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Total Plugins:                                    36           │
-│  Completed:                                        13 (36.1%)   │
-│  Remaining:                                        23           │
+│  Completed:                                        14 (38.9%)   │
+│  Remaining:                                        22           │
 ├─────────────────────────────────────────────────────────────────┤
 │  Total Go Test Files:                              73           │
-│  Test Files Migrated:                              13           │
-│  Tests Passing:                                    112          │
+│  Test Files Migrated:                              14           │
+│  Tests Passing:                                    125          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -48,7 +48,7 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 | 18 | denyserviceexternalips | DenyServiceExternalIPs | `network/denyserviceexternalips/` | `admission_test.go` | ✅ Done |
 | 19 | noderestriction | NodeRestriction | `noderestriction/` | `admission_test.go` | ❌ |
 | 20 | nodetaint | TaintNodesByCondition | `nodetaint/` | `admission_test.go` | ✅ Done |
-| 21 | podnodeselector | PodNodeSelector | `podnodeselector/` | `admission_test.go` | ❌ |
+| 21 | podnodeselector | PodNodeSelector | `podnodeselector/` | `admission_test.go` | ✅ Done |
 | 22 | podtolerationrestriction | PodTolerationRestriction | `podtolerationrestriction/` | `admission_test.go`, `validation_test.go` | ❌ |
 | 23 | podtopologylabels | PodTopologyLabels | `podtopologylabels/` | `admission_test.go` | ❌ |
 | 24 | podpriority | Priority | `priority/` | `admission_test.go` | ❌ |
@@ -113,10 +113,10 @@ Rewrite all admission plugins from `pkg/kubeapiserver/options/plugins.go` entry 
 - Prevents deletion of immortal namespaces (default, kube-system, kube-public)
 - Prevents creation of resources in terminating namespaces
 
-### 13. LimitRanger
-- Enforces usage limits on a per resource basis in the namespace
-- Sets default resource requests/limits from LimitRange
-- Validates resource constraints (min, max, ratios)
+### 14. PodNodeSelector
+- Enforces that pods use node selectors matching namespace's allowed selectors
+- Merges namespace node selector with pod node selector
+- Validates against namespace whitelist
 
 ## Project Structure
 
@@ -177,8 +177,8 @@ cargo test
 
 Current test results:
 ```
-running 112 tests
-test result: ok. 112 passed; 0 failed; 0 ignored
+running 125 tests
+test result: ok. 125 passed; 0 failed; 0 ignored
 ```
 
 ## Original Go Source

@@ -434,6 +434,8 @@ pub struct PodSpec {
     pub affinity: Option<Affinity>,
     /// List of tolerations.
     pub tolerations: Vec<Toleration>,
+    /// NodeSelector is a selector which must be true for the pod to fit on a node.
+    pub node_selector: HashMap<String, String>,
 }
 
 impl PodSpec {
@@ -810,6 +812,7 @@ mod tests {
     #[test]
     fn test_pod_spec_visit_containers() {
         let spec = PodSpec {
+            node_selector: std::collections::HashMap::new(),
             init_containers: vec![Container::new("init1", "busybox")],
             containers: vec![
                 Container::new("main1", "nginx"),
@@ -836,6 +839,7 @@ mod tests {
     #[test]
     fn test_pod_spec_visit_containers_short_circuit() {
         let spec = PodSpec {
+            node_selector: std::collections::HashMap::new(),
             init_containers: vec![],
             containers: vec![
                 Container::new("main1", "nginx"),
