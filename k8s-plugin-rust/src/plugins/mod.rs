@@ -14,7 +14,9 @@
 
 //! Admission plugins module.
 
+pub mod admit;
 pub mod alwayspullimages;
+pub mod deny;
 
 use crate::admission::Plugins;
 
@@ -98,12 +100,10 @@ pub fn default_off_plugins() -> Vec<&'static str> {
 /// Register all admission plugins.
 /// This corresponds to RegisterAllAdmissionPlugins in plugins.go
 pub fn register_all_admission_plugins(plugins: &Plugins) {
+    admit::register(plugins);
     alwayspullimages::register(plugins);
-    // Other plugins would be registered here:
-    // admit::register(plugins);
-    // antiaffinity::register(plugins);
-    // deny::register(plugins);
-    // etc.
+    deny::register(plugins);
+    // TODO: Register remaining plugins as they are implemented
 }
 
 #[cfg(test)]
