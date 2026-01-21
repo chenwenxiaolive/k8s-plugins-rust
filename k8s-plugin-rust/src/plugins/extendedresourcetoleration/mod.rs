@@ -146,7 +146,7 @@ fn add_or_update_toleration(pod: &mut Pod, toleration: Toleration) {
 mod tests {
     use super::*;
     use crate::admission::attributes::{AttributesRecord, GroupVersionKind, GroupVersionResource};
-    use crate::api::core::{Container, PodSpec, ResourceRequirements};
+    use crate::api::core::{Container, ResourceRequirements};
     use std::collections::HashMap;
 
     fn make_pod_with_resources(container_resources: Vec<HashMap<String, String>>) -> Pod {
@@ -169,7 +169,7 @@ mod tests {
     #[test]
     fn test_empty_pod() {
         let plugin = Plugin::new();
-        let mut pod = Pod::new("test", "default");
+        let pod = Pod::new("test", "default");
 
         let mut attrs = AttributesRecord::new(
             "test",

@@ -350,6 +350,7 @@ mod tests {
     use super::*;
     use crate::admission::attributes::{AttributesRecord, GroupVersionKind, GroupVersionResource};
 
+    #[allow(dead_code)]
     fn create_namespace_store() -> Arc<InMemoryNamespaceStore> {
         let store = Arc::new(InMemoryNamespaceStore::new());
         store.add(NamespaceInfo {

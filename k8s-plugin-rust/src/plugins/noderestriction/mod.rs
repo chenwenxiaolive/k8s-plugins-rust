@@ -1446,9 +1446,9 @@ mod tests {
     fn test_admit_lease_own() {
         let node_store = Arc::new(InMemoryNodeStore::new());
         let pod_store = Arc::new(InMemoryPodStore::new());
-        let plugin = Plugin::with_stores(DefaultNodeIdentifier, pod_store, node_store);
+        let _plugin = Plugin::with_stores(DefaultNodeIdentifier, pod_store, node_store);
 
-        let mut lease = Lease::new("my-node", NAMESPACE_NODE_LEASE);
+        let _lease = Lease::new("my-node", NAMESPACE_NODE_LEASE);
         // We need to inject user info - use a Pod wrapper for testing
         let mut pod = Pod::new("my-node", NAMESPACE_NODE_LEASE);
         pod.annotations.insert("test.user.name".to_string(), "system:node:my-node".to_string());
@@ -1462,9 +1462,9 @@ mod tests {
     fn test_admit_csi_node_own() {
         let node_store = Arc::new(InMemoryNodeStore::new());
         let pod_store = Arc::new(InMemoryPodStore::new());
-        let plugin = Plugin::with_stores(DefaultNodeIdentifier, pod_store, node_store);
+        let _plugin = Plugin::with_stores(DefaultNodeIdentifier, pod_store, node_store);
 
-        let csi_node = CSINode::new("my-node");
+        let _csi_node = CSINode::new("my-node");
 
         // Similar to lease tests - user info injection needed
     }

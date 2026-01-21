@@ -351,7 +351,7 @@ mod tests {
     /// TestIgnoreAdmission validates that a request is ignored if its not a create
     #[test]
     fn test_ignore_admission() {
-        let namespace = "test";
+        let _namespace = "test";
         let store = Arc::new(InMemoryNamespaceStore::new());
         let handler = Provision::with_store(store.clone());
 

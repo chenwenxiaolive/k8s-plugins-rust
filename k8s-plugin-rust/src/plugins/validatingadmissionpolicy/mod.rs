@@ -608,7 +608,8 @@ impl SimpleCelEvaluator {
         if inner.starts_with("object.") {
             let object = context.object.as_ref().ok_or("No object in context")?;
             let path = inner.strip_prefix("object.").unwrap_or(inner);
-            return Ok(self.get_json_path(object, path).is_some());
+            // Use get_json_value instead of get_json_path to handle objects and arrays
+            return Ok(self.get_json_value(object, path).is_some());
         }
 
         Ok(true)

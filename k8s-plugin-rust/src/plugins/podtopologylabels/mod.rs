@@ -487,7 +487,7 @@ mod tests {
         plugin.set_enabled(false);
 
         // When disabled, admit() should return Ok immediately without modifications
-        let mut pod = create_pod("test-pod", Some("test-node"));
+        let pod = create_pod("test-pod", Some("test-node"));
         let mut attrs = AttributesRecord::new(
             "test-pod",
             "test-ns",

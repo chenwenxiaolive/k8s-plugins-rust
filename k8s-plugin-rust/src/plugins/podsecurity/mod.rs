@@ -11,7 +11,7 @@ use crate::admission::{
     AdmissionError, AdmissionResult, Attributes, Handler, Interface, Operation, Plugins,
     ValidationInterface,
 };
-use crate::api::core::{ApiObject, Pod};
+use crate::api::core::Pod;
 use std::collections::HashMap;
 use std::io::Read;
 use std::sync::{Arc, RwLock};
@@ -378,7 +378,7 @@ impl ValidationInterface for Plugin {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::api::core::{Container, PodSpec, PullPolicy, SecurityContext, Capabilities, PodSecurityContext};
+    use crate::api::core::{Container, PullPolicy, SecurityContext, Capabilities, PodSecurityContext};
 
     fn create_pod(name: &str) -> Pod {
         let mut pod = Pod::new(name, "default");

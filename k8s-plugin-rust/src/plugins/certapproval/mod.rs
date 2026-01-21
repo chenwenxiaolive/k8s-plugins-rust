@@ -425,6 +425,7 @@ mod tests {
     }
 
     /// Test attributes that support user info.
+    #[allow(dead_code)]
     struct TestAttributes {
         name: String,
         namespace: String,

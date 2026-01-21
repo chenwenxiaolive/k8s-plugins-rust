@@ -597,7 +597,7 @@ fn tolerations_equal(a: &Toleration, b: &Toleration) -> bool {
 mod tests {
     use super::*;
     use crate::admission::attributes::{AttributesRecord, GroupVersionKind, GroupVersionResource};
-    use crate::api::core::{Container, PodSpec, ResourceRequirements, TolerationEffect, TolerationOperator};
+    use crate::api::core::{Container, ResourceRequirements, TolerationEffect, TolerationOperator};
 
     /// Create a pod with optional overhead set.
     fn new_overhead_valid_pod(name: &str, num_containers: usize, resources: ResourceRequirements, set_overhead: bool) -> Pod {

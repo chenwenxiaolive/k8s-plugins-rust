@@ -430,6 +430,7 @@ impl LRUExpireCache {
 
     /// Clear all entries from the cache.
     #[cfg(test)]
+    #[allow(dead_code)]
     fn clear(&self) {
         if let Ok(mut entries) = self.entries.write() {
             entries.clear();
@@ -850,7 +851,7 @@ mod tests {
     use super::*;
     use crate::admission::attributes::{GroupVersionKind, GroupVersionResource};
     use crate::admission::AttributesRecord;
-    use crate::api::core::{Container, PodSpec, PullPolicy, Service, ServiceSpec};
+    use crate::api::core::{Container, PodSpec, Service, ServiceSpec};
 
     /// Helper to create a pod with a single container.
     fn good_pod(image: &str) -> Pod {
