@@ -115,12 +115,25 @@ impl ValidationInterface for Plugin {
                     }
                 }
 
-                // TODO: Uncomment this block when RequiredDuringSchedulingRequiredDuringExecution is implemented.
-                // for term in &pod_anti_affinity.required_during_scheduling_required_during_execution {
-                //     if term.topology_key != LABEL_HOSTNAME {
-                //         return Err(...);
-                //     }
-                // }
+                // Check RequiredDuringSchedulingRequiredDuringExecution terms
+                for term in &pod_anti_affinity.required_during_scheduling_required_during_execution {
+                    if term.topology_key != LABEL_HOSTNAME {
+                        return Err(AdmissionError::forbidden(
+                            &pod.name,
+                            &pod.namespace,
+                            "pods",
+                            crate::admission::errors::FieldError {
+                                field: "affinity.podAntiAffinity.requiredDuringSchedulingRequiredDuringExecution".to_string(),
+                                error_type: crate::admission::errors::FieldErrorType::Invalid,
+                                value: format!(
+                                    "TopologyKey {} but only key {} is allowed",
+                                    term.topology_key, LABEL_HOSTNAME
+                                ),
+                                supported_values: vec![LABEL_HOSTNAME.to_string()],
+                            },
+                        ));
+                    }
+                }
             }
         }
 
@@ -184,6 +197,7 @@ mod tests {
                             },
                         ],
                         required_during_scheduling_ignored_during_execution: vec![],
+                        required_during_scheduling_required_during_execution: vec![],
                     }),
                     pod_affinity: None,
                 }),
@@ -210,6 +224,7 @@ mod tests {
                             topology_key: LABEL_HOSTNAME.to_string(),
                             namespaces: vec![],
                         }],
+                        required_during_scheduling_required_during_execution: vec![],
                     }),
                     pod_affinity: None,
                 }),
@@ -226,6 +241,7 @@ mod tests {
                             topology_key: LABEL_HOSTNAME.to_string(),
                             namespaces: vec![],
                         }],
+                        required_during_scheduling_required_during_execution: vec![],
                     }),
                     pod_affinity: None,
                 }),
@@ -242,6 +258,7 @@ mod tests {
                             topology_key: " zone ".to_string(),
                             namespaces: vec![],
                         }],
+                        required_during_scheduling_required_during_execution: vec![],
                     }),
                     pod_affinity: None,
                 }),
@@ -270,6 +287,41 @@ mod tests {
                                 namespaces: vec![],
                             },
                         ],
+                        required_during_scheduling_required_during_execution: vec![],
+                    }),
+                    pod_affinity: None,
+                }),
+                error_expected: true,
+            },
+            // valid topologyKey in requiredDuringSchedulingRequiredDuringExecution then admission success.
+            TestCase {
+                name: "valid required_required topologyKey",
+                affinity: Some(Affinity {
+                    pod_anti_affinity: Some(PodAntiAffinity {
+                        preferred_during_scheduling_ignored_during_execution: vec![],
+                        required_during_scheduling_ignored_during_execution: vec![],
+                        required_during_scheduling_required_during_execution: vec![PodAffinityTerm {
+                            label_selector: Some(security_label_selector()),
+                            topology_key: LABEL_HOSTNAME.to_string(),
+                            namespaces: vec![],
+                        }],
+                    }),
+                    pod_affinity: None,
+                }),
+                error_expected: false,
+            },
+            // invalid topologyKey in requiredDuringSchedulingRequiredDuringExecution then admission fails.
+            TestCase {
+                name: "invalid required_required topologyKey",
+                affinity: Some(Affinity {
+                    pod_anti_affinity: Some(PodAntiAffinity {
+                        preferred_during_scheduling_ignored_during_execution: vec![],
+                        required_during_scheduling_ignored_during_execution: vec![],
+                        required_during_scheduling_required_during_execution: vec![PodAffinityTerm {
+                            label_selector: Some(security_label_selector()),
+                            topology_key: "zone".to_string(),
+                            namespaces: vec![],
+                        }],
                     }),
                     pod_affinity: None,
                 }),
@@ -298,20 +350,14 @@ mod tests {
 
             let result = handler.validate(&attrs);
 
-            if test.error_expected && result.is_ok() {
-                panic!(
-                    "{}: Expected error for Anti Affinity but did not get an error",
-                    test.name
-                );
-            }
-
-            if !test.error_expected && result.is_err() {
-                panic!(
-                    "{}: Unexpected error {:?} for AntiAffinity",
-                    test.name,
-                    result.err()
-                );
-            }
+            assert_eq!(
+                test.error_expected,
+                result.is_err(),
+                "{}: expected error={}, got result={:?}",
+                test.name,
+                test.error_expected,
+                result
+            );
         }
     }
 

@@ -450,6 +450,10 @@ pub struct WeightedPodAffinityTerm {
 pub struct PodAntiAffinity {
     pub required_during_scheduling_ignored_during_execution: Vec<PodAffinityTerm>,
     pub preferred_during_scheduling_ignored_during_execution: Vec<WeightedPodAffinityTerm>,
+    /// RequiredDuringSchedulingRequiredDuringExecution - not yet implemented in Kubernetes,
+    /// but reserved for future use. When implemented, pods that don't satisfy this anti-affinity
+    /// rule will be evicted.
+    pub required_during_scheduling_required_during_execution: Vec<PodAffinityTerm>,
 }
 
 /// PodAffinity describes pod affinity scheduling rules.
