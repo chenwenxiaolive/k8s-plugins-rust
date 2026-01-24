@@ -208,7 +208,7 @@ impl MutationInterface for LimitRanger {
         }
 
         let namespace = attributes.get_namespace();
-        let limit_ranges = self.get_limit_ranges(&namespace);
+        let limit_ranges = self.get_limit_ranges(namespace);
 
         for limit_range in &limit_ranges {
             pod_mutate_limit_func(limit_range, attributes)?;
@@ -225,7 +225,7 @@ impl ValidationInterface for LimitRanger {
         }
 
         let namespace = attributes.get_namespace();
-        let limit_ranges = self.get_limit_ranges(&namespace);
+        let limit_ranges = self.get_limit_ranges(namespace);
 
         for limit_range in &limit_ranges {
             pod_validate_limit_func(limit_range, attributes)?;

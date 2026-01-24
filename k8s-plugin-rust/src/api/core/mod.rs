@@ -197,7 +197,7 @@ impl PullPolicy {
     }
 
     /// Parse a pull policy from a string.
-    pub fn from_str(s: &str) -> Self {
+    pub fn parse(s: &str) -> Self {
         match s {
             "Always" => PullPolicy::Always,
             "Never" => PullPolicy::Never,
@@ -968,10 +968,10 @@ mod tests {
         assert_eq!(PullPolicy::IfNotPresent.as_str(), "IfNotPresent");
         assert_eq!(PullPolicy::Empty.as_str(), "");
 
-        assert_eq!(PullPolicy::from_str("Always"), PullPolicy::Always);
-        assert_eq!(PullPolicy::from_str("Never"), PullPolicy::Never);
-        assert_eq!(PullPolicy::from_str("IfNotPresent"), PullPolicy::IfNotPresent);
-        assert_eq!(PullPolicy::from_str(""), PullPolicy::Empty);
+        assert_eq!(PullPolicy::parse("Always"), PullPolicy::Always);
+        assert_eq!(PullPolicy::parse("Never"), PullPolicy::Never);
+        assert_eq!(PullPolicy::parse("IfNotPresent"), PullPolicy::IfNotPresent);
+        assert_eq!(PullPolicy::parse(""), PullPolicy::Empty);
     }
 
     #[test]

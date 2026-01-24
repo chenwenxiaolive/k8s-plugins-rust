@@ -102,6 +102,7 @@ impl CertificateSigningRequestCondition {
 
 /// CertificateSigningRequestSpec contains the certificate request.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default)]
 pub struct CertificateSigningRequestSpec {
     /// The PEM-encoded x509 certificate signing request.
     pub request: Vec<u8>,
@@ -119,19 +120,6 @@ pub struct CertificateSigningRequestSpec {
     pub groups: Vec<String>,
 }
 
-impl Default for CertificateSigningRequestSpec {
-    fn default() -> Self {
-        Self {
-            request: Vec::new(),
-            signer_name: String::new(),
-            expiration_seconds: None,
-            usages: Vec::new(),
-            username: String::new(),
-            uid: String::new(),
-            groups: Vec::new(),
-        }
-    }
-}
 
 /// CertificateSigningRequestStatus contains the status of the request.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

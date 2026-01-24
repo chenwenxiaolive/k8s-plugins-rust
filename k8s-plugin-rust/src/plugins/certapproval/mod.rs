@@ -149,10 +149,7 @@ pub fn is_authorized_for_signer_name(
 
     // If not, check if the user has wildcard permissions for the domain portion
     let wildcard_attrs = AuthorizerAttributes::for_signer_wildcard(user, verb, signer_name);
-    match authorizer.authorize(&wildcard_attrs) {
-        Ok((Decision::Allow, _)) => true,
-        _ => false,
-    }
+    matches!(authorizer.authorize(&wildcard_attrs), Ok((Decision::Allow, _)))
 }
 
 /// CertificateSigningRequest represents a CSR resource.

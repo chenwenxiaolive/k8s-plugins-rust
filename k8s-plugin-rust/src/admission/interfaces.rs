@@ -45,7 +45,7 @@ impl fmt::Display for Operation {
 
 impl Operation {
     /// Parse an operation from a string.
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse(s: &str) -> Option<Self> {
         match s.to_uppercase().as_str() {
             "CREATE" => Some(Operation::Create),
             "UPDATE" => Some(Operation::Update),
@@ -93,11 +93,11 @@ mod tests {
 
     #[test]
     fn test_operation_from_str() {
-        assert_eq!(Operation::from_str("CREATE"), Some(Operation::Create));
-        assert_eq!(Operation::from_str("create"), Some(Operation::Create));
-        assert_eq!(Operation::from_str("UPDATE"), Some(Operation::Update));
-        assert_eq!(Operation::from_str("DELETE"), Some(Operation::Delete));
-        assert_eq!(Operation::from_str("CONNECT"), Some(Operation::Connect));
-        assert_eq!(Operation::from_str("UNKNOWN"), None);
+        assert_eq!(Operation::parse("CREATE"), Some(Operation::Create));
+        assert_eq!(Operation::parse("create"), Some(Operation::Create));
+        assert_eq!(Operation::parse("UPDATE"), Some(Operation::Update));
+        assert_eq!(Operation::parse("DELETE"), Some(Operation::Delete));
+        assert_eq!(Operation::parse("CONNECT"), Some(Operation::Connect));
+        assert_eq!(Operation::parse("UNKNOWN"), None);
     }
 }

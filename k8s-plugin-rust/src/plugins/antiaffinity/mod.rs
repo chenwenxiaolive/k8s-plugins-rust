@@ -74,7 +74,7 @@ impl ValidationInterface for Plugin {
         }
 
         let resource = attributes.get_resource();
-        if resource.group != "" || resource.resource != "pods" {
+        if !resource.group.is_empty() || resource.resource != "pods" {
             return Ok(());
         }
 

@@ -218,6 +218,7 @@ impl ImageReview {
 
 /// ImagePolicyWebhookConfig holds configuration for the webhook.
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub struct ImagePolicyWebhookConfig {
     /// Path to the kubeconfig file for the webhook backend.
     pub kube_config_file: String,
@@ -268,17 +269,6 @@ impl ImagePolicyWebhookConfig {
     }
 }
 
-impl Default for ImagePolicyWebhookConfig {
-    fn default() -> Self {
-        Self {
-            kube_config_file: String::new(),
-            allow_ttl: 0,
-            deny_ttl: 0,
-            retry_backoff: 0,
-            default_allow: false,
-        }
-    }
-}
 
 /// AdmissionConfig holds the top-level admission configuration.
 #[derive(Debug, Clone, Default)]
@@ -484,6 +474,9 @@ impl std::fmt::Display for WebhookError {
 
 impl std::error::Error for WebhookError {}
 
+/// Type alias for image review callback function.
+pub type ImageReviewFn = Box<dyn Fn(&ImageReview) -> Result<ImageReviewStatus, WebhookError> + Send + Sync>;
+
 /// A mock webhook client that allows all images by default.
 /// In a real implementation, this would make HTTP requests to the webhook backend.
 #[derive(Debug, Default)]
@@ -500,7 +493,7 @@ impl WebhookClient for DefaultWebhookClient {
 /// A configurable mock webhook client for testing.
 pub struct MockWebhookClient {
     /// Function to determine if an image is allowed.
-    review_fn: Box<dyn Fn(&ImageReview) -> Result<ImageReviewStatus, WebhookError> + Send + Sync>,
+    review_fn: ImageReviewFn,
 }
 
 impl MockWebhookClient {

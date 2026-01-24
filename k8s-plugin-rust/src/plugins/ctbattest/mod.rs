@@ -403,7 +403,7 @@ impl Plugin {
             Some(obj) => match obj.as_any().downcast_ref::<ClusterTrustBundle>() {
                 Some(bundle) => bundle,
                 None => {
-                    return Err(AdmissionError::Forbidden(crate::admission::errors::ForbiddenError {
+                    return Err(AdmissionError::Forbidden(Box::new(crate::admission::errors::ForbiddenError {
                         name: attributes.get_name().to_string(),
                         namespace: String::new(),
                         resource: "clustertrustbundles".to_string(),
@@ -414,7 +414,7 @@ impl Plugin {
                                 obj.kind()),
                             supported_values: vec![],
                         },
-                    }));
+                    })));
                 }
             },
             None => return Ok(()),
@@ -445,7 +445,7 @@ impl Plugin {
                 "attest",
                 &new_bundle.spec.signer_name,
             ) {
-                return Err(AdmissionError::Forbidden(crate::admission::errors::ForbiddenError {
+                return Err(AdmissionError::Forbidden(Box::new(crate::admission::errors::ForbiddenError {
                     name: new_bundle.metadata.name.clone(),
                     namespace: String::new(),
                     resource: "clustertrustbundles".to_string(),
@@ -458,7 +458,7 @@ impl Plugin {
                         ),
                         supported_values: vec![],
                     },
-                }));
+                })));
             }
         }
 

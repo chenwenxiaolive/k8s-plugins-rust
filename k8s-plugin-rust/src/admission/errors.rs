@@ -29,11 +29,11 @@ pub enum AdmissionError {
 
     /// Forbidden indicates the request is not allowed.
     #[error("{0}")]
-    Forbidden(ForbiddenError),
+    Forbidden(Box<ForbiddenError>),
 
     /// Aggregate represents multiple errors.
     #[error("{0}")]
-    Aggregate(AggregateError),
+    Aggregate(Box<AggregateError>),
 
     /// Internal represents an internal error.
     #[error("internal error: {0}")]
@@ -61,17 +61,17 @@ impl AdmissionError {
         resource: impl Into<String>,
         field_error: FieldError,
     ) -> Self {
-        AdmissionError::Forbidden(ForbiddenError {
+        AdmissionError::Forbidden(Box::new(ForbiddenError {
             name: name.into(),
             namespace: namespace.into(),
             resource: resource.into(),
             field_error,
-        })
+        }))
     }
 
     /// Create an aggregate error from multiple errors.
     pub fn aggregate(errors: Vec<AdmissionError>) -> Self {
-        AdmissionError::Aggregate(AggregateError { errors })
+        AdmissionError::Aggregate(Box::new(AggregateError { errors }))
     }
 
     /// Create a NotFound error.

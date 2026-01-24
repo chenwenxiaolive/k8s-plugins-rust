@@ -34,16 +34,13 @@ pub const DEFAULT_PRIORITY_WHEN_NO_DEFAULT_CLASS_EXISTS: i32 = 0;
 
 /// PreemptionPolicy describes the preemption policy.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default)]
 pub enum PreemptionPolicy {
+    #[default]
     PreemptLowerPriority,
     Never,
 }
 
-impl Default for PreemptionPolicy {
-    fn default() -> Self {
-        PreemptionPolicy::PreemptLowerPriority
-    }
-}
 
 /// PriorityClass defines a priority class.
 #[derive(Debug, Clone)]
@@ -167,11 +164,10 @@ impl Plugin {
 
         let mut default_pc: Option<PriorityClass> = None;
         for pc in list {
-            if pc.global_default {
-                if default_pc.is_none() || default_pc.as_ref().unwrap().value > pc.value {
+            if pc.global_default
+                && (default_pc.is_none() || default_pc.as_ref().unwrap().value > pc.value) {
                     default_pc = Some(pc);
                 }
-            }
         }
         default_pc
     }

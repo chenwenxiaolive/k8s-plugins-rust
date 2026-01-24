@@ -46,7 +46,7 @@ pub enum FailurePolicy {
 }
 
 impl FailurePolicy {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
             "fail" => Some(FailurePolicy::Fail),
             "ignore" => Some(FailurePolicy::Ignore),
@@ -73,7 +73,7 @@ pub enum ReinvocationPolicy {
 }
 
 impl ReinvocationPolicy {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
             "never" => Some(ReinvocationPolicy::Never),
             "ifneeded" => Some(ReinvocationPolicy::IfNeeded),
@@ -843,10 +843,10 @@ mod tests {
 
     #[test]
     fn test_failure_policy_from_str() {
-        assert_eq!(FailurePolicy::from_str("fail"), Some(FailurePolicy::Fail));
-        assert_eq!(FailurePolicy::from_str("Fail"), Some(FailurePolicy::Fail));
-        assert_eq!(FailurePolicy::from_str("ignore"), Some(FailurePolicy::Ignore));
-        assert_eq!(FailurePolicy::from_str("invalid"), None);
+        assert_eq!(FailurePolicy::parse("fail"), Some(FailurePolicy::Fail));
+        assert_eq!(FailurePolicy::parse("Fail"), Some(FailurePolicy::Fail));
+        assert_eq!(FailurePolicy::parse("ignore"), Some(FailurePolicy::Ignore));
+        assert_eq!(FailurePolicy::parse("invalid"), None);
     }
 
     #[test]
@@ -857,9 +857,9 @@ mod tests {
 
     #[test]
     fn test_reinvocation_policy_from_str() {
-        assert_eq!(ReinvocationPolicy::from_str("never"), Some(ReinvocationPolicy::Never));
-        assert_eq!(ReinvocationPolicy::from_str("ifneeded"), Some(ReinvocationPolicy::IfNeeded));
-        assert_eq!(ReinvocationPolicy::from_str("invalid"), None);
+        assert_eq!(ReinvocationPolicy::parse("never"), Some(ReinvocationPolicy::Never));
+        assert_eq!(ReinvocationPolicy::parse("ifneeded"), Some(ReinvocationPolicy::IfNeeded));
+        assert_eq!(ReinvocationPolicy::parse("invalid"), None);
     }
 
     #[test]

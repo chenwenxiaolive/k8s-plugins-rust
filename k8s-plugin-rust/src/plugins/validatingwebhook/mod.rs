@@ -48,7 +48,7 @@ impl FailurePolicy {
         }
     }
 
-    pub fn from_str(s: &str) -> Self {
+    pub fn parse(s: &str) -> Self {
         match s {
             "Ignore" => FailurePolicy::Ignore,
             _ => FailurePolicy::Fail,
@@ -80,7 +80,7 @@ impl SideEffectClass {
         }
     }
 
-    pub fn from_str(s: &str) -> Self {
+    pub fn parse(s: &str) -> Self {
         match s {
             "None" => SideEffectClass::None,
             "Some" => SideEffectClass::Some,
@@ -113,7 +113,7 @@ impl MatchPolicy {
         }
     }
 
-    pub fn from_str(s: &str) -> Self {
+    pub fn parse(s: &str) -> Self {
         match s {
             "Equivalent" => MatchPolicy::Equivalent,
             _ => MatchPolicy::Exact,
@@ -142,7 +142,7 @@ impl OperationType {
         }
     }
 
-    pub fn from_str(s: &str) -> Self {
+    pub fn parse(s: &str) -> Self {
         match s {
             "*" => OperationType::All,
             "CREATE" => OperationType::Create,
@@ -284,8 +284,8 @@ impl LabelSelector {
         for expr in &self.match_expressions {
             let label_value = labels.get(&expr.key);
             let matches = match expr.operator.as_str() {
-                "In" => label_value.map_or(false, |v| expr.values.contains(v)),
-                "NotIn" => label_value.map_or(true, |v| !expr.values.contains(v)),
+                "In" => label_value.is_some_and(|v| expr.values.contains(v)),
+                "NotIn" => label_value.is_none_or(|v| !expr.values.contains(v)),
                 "Exists" => label_value.is_some(),
                 "DoesNotExist" => label_value.is_none(),
                 _ => true,
@@ -1124,9 +1124,9 @@ mod tests {
     fn test_failure_policy() {
         assert_eq!(FailurePolicy::Fail.as_str(), "Fail");
         assert_eq!(FailurePolicy::Ignore.as_str(), "Ignore");
-        assert_eq!(FailurePolicy::from_str("Fail"), FailurePolicy::Fail);
-        assert_eq!(FailurePolicy::from_str("Ignore"), FailurePolicy::Ignore);
-        assert_eq!(FailurePolicy::from_str("unknown"), FailurePolicy::Fail);
+        assert_eq!(FailurePolicy::parse("Fail"), FailurePolicy::Fail);
+        assert_eq!(FailurePolicy::parse("Ignore"), FailurePolicy::Ignore);
+        assert_eq!(FailurePolicy::parse("unknown"), FailurePolicy::Fail);
     }
 
     #[test]
@@ -1671,8 +1671,8 @@ mod tests {
     fn test_match_policy() {
         assert_eq!(MatchPolicy::Exact.as_str(), "Exact");
         assert_eq!(MatchPolicy::Equivalent.as_str(), "Equivalent");
-        assert_eq!(MatchPolicy::from_str("Exact"), MatchPolicy::Exact);
-        assert_eq!(MatchPolicy::from_str("Equivalent"), MatchPolicy::Equivalent);
+        assert_eq!(MatchPolicy::parse("Exact"), MatchPolicy::Exact);
+        assert_eq!(MatchPolicy::parse("Equivalent"), MatchPolicy::Equivalent);
     }
 
     #[test]

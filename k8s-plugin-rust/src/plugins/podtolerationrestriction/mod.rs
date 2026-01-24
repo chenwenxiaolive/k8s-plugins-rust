@@ -271,7 +271,7 @@ impl ValidationInterface for Plugin {
             {
                 return Err(AdmissionError::invalid(
                     "PodTolerationRestriction",
-                    &format!(
+                    format!(
                         "pod tolerations conflict with {} whitelist",
                         scope
                     ),

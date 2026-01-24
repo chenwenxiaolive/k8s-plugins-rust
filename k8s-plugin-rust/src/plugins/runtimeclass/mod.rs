@@ -204,11 +204,9 @@ impl RuntimeClassClient for InMemoryRuntimeClassStore {
 // Pod Extension for RuntimeClass
 // ============================================================================
 
-/// Extension trait for Pod to add RuntimeClass-related fields.
+/// PodRuntimeClassInfo holds RuntimeClass-related pod information.
 /// In a real implementation, these would be part of the Pod struct.
 /// For this implementation, we use a separate storage mechanism.
-
-/// PodRuntimeClassInfo holds RuntimeClass-related pod information.
 #[derive(Debug, Clone, Default)]
 pub struct PodRuntimeClassInfo {
     /// The name of the RuntimeClass for this pod.
@@ -383,14 +381,10 @@ impl MutationInterface for Plugin {
         };
 
         // Set overhead
-        if let Err(e) = set_overhead(pod, &runtime_class) {
-            return Err(e);
-        }
+        set_overhead(pod, &runtime_class)?;
 
         // Set scheduling
-        if let Err(e) = set_scheduling(pod, &runtime_class) {
-            return Err(e);
-        }
+        set_scheduling(pod, &runtime_class)?;
 
         Ok(())
     }
@@ -455,13 +449,12 @@ fn set_overhead(pod: &mut Pod, runtime_class: &RuntimeClass) -> AdmissionResult<
     let pod_overhead = get_pod_overhead(pod);
 
     // If pod already has overhead set, check if it matches
-    if !pod_overhead.is_empty() {
-        if !resource_lists_equal(&pod_overhead, &overhead.pod_fixed) {
+    if !pod_overhead.is_empty()
+        && !resource_lists_equal(&pod_overhead, &overhead.pod_fixed) {
             return Err(AdmissionError::bad_request(
                 "pod rejected: Pod's Overhead doesn't match RuntimeClass's defined Overhead",
             ));
         }
-    }
 
     // Set the overhead on the pod
     set_pod_overhead(pod, &overhead.pod_fixed);

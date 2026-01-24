@@ -689,7 +689,7 @@ impl ValidationInterface for Plugin {
         }
 
         if !errors.is_empty() {
-            return Err(AdmissionError::too_many_requests(&errors.join("; ")));
+            return Err(AdmissionError::too_many_requests(errors.join("; ")));
         }
 
         Ok(())

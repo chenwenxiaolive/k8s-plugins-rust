@@ -209,7 +209,7 @@ impl MutationInterface for Provision {
         if !self.is_ready() {
             return Err(AdmissionError::forbidden(
                 attributes.get_name(),
-                &*namespace,
+                namespace,
                 &attributes.get_resource().resource,
                 crate::admission::errors::FieldError {
                     field: String::new(),
@@ -229,7 +229,7 @@ impl MutationInterface for Provision {
         };
 
         // If namespace exists, we're done
-        if lister.get(&namespace).is_ok() {
+        if lister.get(namespace).is_ok() {
             return Ok(());
         }
 
@@ -242,7 +242,7 @@ impl MutationInterface for Provision {
         };
 
         // Create the namespace (handles AlreadyExists gracefully)
-        match client.create_namespace(&namespace) {
+        match client.create_namespace(namespace) {
             Ok(()) => Ok(()),
             Err(AdmissionError::NotFound { .. }) => Ok(()), // Already exists is OK
             Err(e) => Err(e),

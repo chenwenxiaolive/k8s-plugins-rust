@@ -45,7 +45,7 @@ pub enum Level {
 }
 
 impl Level {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
             "privileged" => Some(Level::Privileged),
             "baseline" => Some(Level::Baseline),
@@ -103,19 +103,19 @@ impl NamespacePolicy {
     pub fn from_labels(labels: &HashMap<String, String>) -> Self {
         let mut policy = Self::default();
 
-        if let Some(level) = labels.get(LABEL_ENFORCE).and_then(|s| Level::from_str(s)) {
+        if let Some(level) = labels.get(LABEL_ENFORCE).and_then(|s| Level::parse(s)) {
             policy.enforce = level;
         }
         if let Some(version) = labels.get(LABEL_ENFORCE_VERSION) {
             policy.enforce_version = version.clone();
         }
-        if let Some(level) = labels.get(LABEL_AUDIT).and_then(|s| Level::from_str(s)) {
+        if let Some(level) = labels.get(LABEL_AUDIT).and_then(|s| Level::parse(s)) {
             policy.audit = level;
         }
         if let Some(version) = labels.get(LABEL_AUDIT_VERSION) {
             policy.audit_version = version.clone();
         }
-        if let Some(level) = labels.get(LABEL_WARN).and_then(|s| Level::from_str(s)) {
+        if let Some(level) = labels.get(LABEL_WARN).and_then(|s| Level::parse(s)) {
             policy.warn = level;
         }
         if let Some(version) = labels.get(LABEL_WARN_VERSION) {
@@ -356,7 +356,7 @@ impl ValidationInterface for Plugin {
 
         // Get namespace policy
         let namespace = attributes.get_namespace();
-        let policy = self.get_namespace_policy(&namespace);
+        let policy = self.get_namespace_policy(namespace);
 
         // Check against enforce level
         let results = SecurityChecker::check_pod(pod, policy.enforce);
@@ -444,11 +444,11 @@ mod tests {
 
     #[test]
     fn test_level_from_str() {
-        assert_eq!(Level::from_str("privileged"), Some(Level::Privileged));
-        assert_eq!(Level::from_str("baseline"), Some(Level::Baseline));
-        assert_eq!(Level::from_str("restricted"), Some(Level::Restricted));
-        assert_eq!(Level::from_str("PRIVILEGED"), Some(Level::Privileged));
-        assert_eq!(Level::from_str("invalid"), None);
+        assert_eq!(Level::parse("privileged"), Some(Level::Privileged));
+        assert_eq!(Level::parse("baseline"), Some(Level::Baseline));
+        assert_eq!(Level::parse("restricted"), Some(Level::Restricted));
+        assert_eq!(Level::parse("PRIVILEGED"), Some(Level::Privileged));
+        assert_eq!(Level::parse("invalid"), None);
     }
 
     #[test]

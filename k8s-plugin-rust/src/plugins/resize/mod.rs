@@ -31,6 +31,7 @@ pub fn register(plugins: &Plugins) {
 /// Quantity represents a Kubernetes resource quantity (e.g., "1Gi", "500Mi").
 /// This is a simplified implementation that parses and compares storage quantities.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default)]
 pub struct Quantity {
     /// The raw value in bytes (for storage quantities)
     value: i64,
@@ -89,16 +90,11 @@ impl Quantity {
     /// - negative if self < other
     /// - zero if self == other
     /// - positive if self > other
-    pub fn cmp(&self, other: &Quantity) -> i64 {
+    pub fn compare_value(&self, other: &Quantity) -> i64 {
         self.value - other.value
     }
 }
 
-impl Default for Quantity {
-    fn default() -> Self {
-        Quantity { value: 0 }
-    }
-}
 
 // ============================================================================
 // PersistentVolumeClaim types
@@ -106,8 +102,10 @@ impl Default for Quantity {
 
 /// PersistentVolumeClaimPhase represents the phase of a PVC.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default)]
 pub enum PersistentVolumeClaimPhase {
     /// Pending means the PVC is not yet bound to a PV.
+    #[default]
     Pending,
     /// Bound means the PVC is bound to a PV.
     Bound,
@@ -115,11 +113,6 @@ pub enum PersistentVolumeClaimPhase {
     Lost,
 }
 
-impl Default for PersistentVolumeClaimPhase {
-    fn default() -> Self {
-        PersistentVolumeClaimPhase::Pending
-    }
-}
 
 /// Resource name for storage.
 pub const RESOURCE_STORAGE: &str = "storage";
@@ -403,7 +396,7 @@ impl ValidationInterface for Plugin {
         let new_size = pvc.spec.resources.get_storage();
 
         // If size is not increasing, allow the update
-        if new_size.cmp(&old_size) <= 0 {
+        if new_size.compare_value(&old_size) <= 0 {
             return Ok(());
         }
 
@@ -494,9 +487,9 @@ mod tests {
         let q2 = Quantity::parse("2Gi").unwrap();
         let q3 = Quantity::parse("1Gi").unwrap();
 
-        assert!(q1.cmp(&q2) < 0);
-        assert!(q2.cmp(&q1) > 0);
-        assert_eq!(q1.cmp(&q3), 0);
+        assert!(q1.compare_value(&q2) < 0);
+        assert!(q2.compare_value(&q1) > 0);
+        assert_eq!(q1.compare_value(&q3), 0);
     }
 
     #[test]

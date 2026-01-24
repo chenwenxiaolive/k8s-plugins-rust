@@ -160,10 +160,10 @@ impl MutationInterface for Lifecycle {
         if operation == Operation::Delete
             && kind.group.is_empty()
             && kind.kind == "Namespace"
-            && self.immortal_namespaces.contains(&*name)
+            && self.immortal_namespaces.contains(name)
         {
             return Err(AdmissionError::forbidden(
-                &*name,
+                name,
                 "",
                 "namespaces",
                 crate::admission::errors::FieldError {
@@ -198,8 +198,8 @@ impl MutationInterface for Lifecycle {
         // Check if ready
         if !self.is_ready() {
             return Err(AdmissionError::forbidden(
-                &*name,
-                &*namespace,
+                name,
+                namespace,
                 &attributes.get_resource().resource,
                 crate::admission::errors::FieldError {
                     field: String::new(),
@@ -216,21 +216,21 @@ impl MutationInterface for Lifecycle {
             None => return Err(AdmissionError::internal_error("namespace lister not configured")),
         };
 
-        let phase = lister.get_phase(&namespace);
+        let phase = lister.get_phase(namespace);
 
         // Refuse to operate on non-existent namespaces
         let phase = match phase {
             Some(p) => p,
             None => {
-                return Err(AdmissionError::not_found("Namespace", &*namespace));
+                return Err(AdmissionError::not_found("Namespace", namespace));
             }
         };
 
         // Prevent creation in terminating namespaces
         if operation == Operation::Create && phase == NamespacePhase::Terminating {
             return Err(AdmissionError::forbidden(
-                &*name,
-                &*namespace,
+                name,
+                namespace,
                 &attributes.get_resource().resource,
                 crate::admission::errors::FieldError {
                     field: "metadata.namespace".to_string(),

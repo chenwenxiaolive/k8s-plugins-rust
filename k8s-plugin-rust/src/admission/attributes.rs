@@ -126,6 +126,7 @@ pub struct AttributesRecord {
 
 impl AttributesRecord {
     /// Create a new AttributesRecord for testing or general use.
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         name: &str,
         namespace: &str,
@@ -219,7 +220,7 @@ impl Attributes for AttributesRecord {
     }
 
     fn get_object_mut(&mut self) -> Option<&mut (dyn ApiObject + 'static)> {
-        self.object.as_mut().map(|o| &mut **o)
+        self.object.as_deref_mut()
     }
 
     fn get_old_object(&self) -> Option<&dyn ApiObject> {

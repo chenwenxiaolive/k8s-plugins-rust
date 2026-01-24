@@ -68,7 +68,7 @@ impl MutationInterface for Plugin {
     fn admit(&self, attributes: &mut dyn Attributes) -> AdmissionResult<()> {
         // Our job is just to taint nodes.
         let resource = attributes.get_resource();
-        if resource.group != "" || resource.resource != "nodes" {
+        if !resource.group.is_empty() || resource.resource != "nodes" {
             return Ok(());
         }
 
@@ -89,7 +89,7 @@ impl MutationInterface for Plugin {
                         crate::admission::errors::FieldError {
                             field: String::new(),
                             error_type: crate::admission::errors::FieldErrorType::Invalid,
-                            value: format!("unexpected type"),
+                            value: "unexpected type".to_string(),
                             supported_values: vec![],
                         },
                     ));

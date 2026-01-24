@@ -182,7 +182,7 @@ impl ValidationInterface for Exists {
         if !self.is_ready() {
             return Err(AdmissionError::forbidden(
                 attributes.get_name(),
-                &*namespace,
+                namespace,
                 &attributes.get_resource().resource,
                 crate::admission::errors::FieldError {
                     field: String::new(),
@@ -203,7 +203,7 @@ impl ValidationInterface for Exists {
             }
         };
 
-        match lister.get(&namespace) {
+        match lister.get(namespace) {
             Ok(()) => Ok(()),
             Err(e) => Err(e),
         }

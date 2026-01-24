@@ -67,7 +67,7 @@ impl ValidationInterface for Plugin {
     fn validate(&self, attributes: &dyn Attributes) -> AdmissionResult<()> {
         // Only process services
         let resource = attributes.get_resource();
-        if resource.group != "" || resource.resource != "services" {
+        if !resource.group.is_empty() || resource.resource != "services" {
             return Ok(());
         }
 

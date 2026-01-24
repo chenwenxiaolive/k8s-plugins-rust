@@ -110,7 +110,7 @@ impl MutationInterface for Plugin {
     fn admit(&self, attributes: &mut dyn Attributes) -> AdmissionResult<()> {
         // Only process pods
         let resource = attributes.get_resource();
-        if resource.group != "" || resource.resource != "pods" {
+        if !resource.group.is_empty() || resource.resource != "pods" {
             return Ok(());
         }
 
@@ -125,9 +125,7 @@ impl MutationInterface for Plugin {
             Some(o) => match o.as_any_mut().downcast_mut::<Pod>() {
                 Some(p) => p,
                 None => {
-                    return Err(AdmissionError::bad_request(format!(
-                        "expected *Pod but got different type"
-                    )));
+                    return Err(AdmissionError::bad_request("expected *Pod but got different type".to_string()));
                 }
             },
             None => return Ok(()),

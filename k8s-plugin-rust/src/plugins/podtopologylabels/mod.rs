@@ -250,7 +250,7 @@ impl MutationInterface for Plugin {
             return Err(AdmissionError::not_ready(PLUGIN_NAME));
         }
 
-        match subresource.as_ref() {
+        match subresource {
             "" => {
                 // Regular Pod endpoint
                 let pod = match attributes

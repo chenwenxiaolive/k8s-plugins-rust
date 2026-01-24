@@ -138,7 +138,7 @@ impl Plugin {
         if let Some(ns) = namespace.annotations.get(NAMESPACE_NODE_SELECTOR_ANNOTATION) {
             let labels_map = parse_selector_to_labels_map(ns)?;
             if labels_conflict(&selector, &labels_map) {
-                return Err(AdmissionError::bad_request(&format!(
+                return Err(AdmissionError::bad_request(format!(
                     "{} annotations' node label selectors conflict",
                     namespace.name
                 )));
@@ -235,7 +235,7 @@ impl ValidationInterface for Plugin {
         }
 
         let namespace = attributes.get_namespace();
-        let namespace_node_selector = self.get_namespace_node_selector_map(&namespace)?;
+        let namespace_node_selector = self.get_namespace_node_selector_map(namespace)?;
 
         // Get pod
         let obj = match attributes.get_object() {
@@ -254,7 +254,7 @@ impl ValidationInterface for Plugin {
         if labels_conflict(&namespace_node_selector, &pod.spec.node_selector) {
             return Err(AdmissionError::forbidden(
                 &pod.name,
-                &*namespace,
+                namespace,
                 "pods",
                 crate::admission::errors::FieldError {
                     field: "spec.nodeSelector".to_string(),
@@ -266,7 +266,7 @@ impl ValidationInterface for Plugin {
         }
 
         // Whitelist verification
-        let whitelist = if let Some(wl) = self.cluster_node_selectors.get(&*namespace) {
+        let whitelist = if let Some(wl) = self.cluster_node_selectors.get(namespace) {
             parse_selector_to_labels_map(wl)?
         } else {
             LabelSet::new()
@@ -275,7 +275,7 @@ impl ValidationInterface for Plugin {
         if !is_subset(&pod.spec.node_selector, &whitelist) {
             return Err(AdmissionError::forbidden(
                 &pod.name,
-                &*namespace,
+                namespace,
                 "pods",
                 crate::admission::errors::FieldError {
                     field: "spec.nodeSelector".to_string(),
@@ -305,7 +305,7 @@ fn parse_selector_to_labels_map(selector: &str) -> AdmissionResult<LabelSet> {
         }
         let kv: Vec<&str> = part.splitn(2, '=').collect();
         if kv.len() != 2 {
-            return Err(AdmissionError::bad_request(&format!(
+            return Err(AdmissionError::bad_request(format!(
                 "invalid selector format: {}",
                 part
             )));
