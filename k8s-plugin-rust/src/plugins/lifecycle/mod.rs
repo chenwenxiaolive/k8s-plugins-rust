@@ -69,11 +69,19 @@ impl InMemoryNamespaceStore {
     }
 
     pub fn add(&self, name: &str, phase: NamespacePhase) {
-        self.namespaces.write().unwrap().insert(name.to_string(), phase);
+        self.namespaces
+            .write()
+            .expect("namespace store lock poisoned")
+            .insert(name.to_string(), phase);
     }
 
     pub fn set_terminating(&self, name: &str) {
-        if let Some(phase) = self.namespaces.write().unwrap().get_mut(name) {
+        if let Some(phase) = self
+            .namespaces
+            .write()
+            .expect("namespace store lock poisoned")
+            .get_mut(name)
+        {
             *phase = NamespacePhase::Terminating;
         }
     }
@@ -81,7 +89,11 @@ impl InMemoryNamespaceStore {
 
 impl NamespaceLister for InMemoryNamespaceStore {
     fn get_phase(&self, name: &str) -> Option<NamespacePhase> {
-        self.namespaces.read().unwrap().get(name).copied()
+        self.namespaces
+            .read()
+            .expect("namespace store lock poisoned")
+            .get(name)
+            .copied()
     }
 }
 
@@ -115,7 +127,7 @@ impl Lifecycle {
     }
 
     pub fn is_ready(&self) -> bool {
-        *self.ready.read().unwrap()
+        *self.ready.read().expect("ready state lock poisoned")
     }
 
     /// Check if a resource is an access review (always allowed).

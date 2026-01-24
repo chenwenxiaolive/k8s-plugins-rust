@@ -73,17 +73,28 @@ impl InMemoryNamespaceStore {
 
     /// Add a namespace.
     pub fn add(&self, name: &str) {
-        self.namespaces.write().unwrap().insert(name.to_string());
+        self.namespaces
+            .write()
+            .expect("namespace store lock poisoned")
+            .insert(name.to_string());
     }
 
     /// Check if namespace exists.
     pub fn exists(&self, name: &str) -> bool {
-        self.namespaces.read().unwrap().contains(name)
+        self.namespaces
+            .read()
+            .expect("namespace store lock poisoned")
+            .contains(name)
     }
 
     /// Get the list of created namespaces (for testing).
     pub fn get_namespaces(&self) -> Vec<String> {
-        self.namespaces.read().unwrap().iter().cloned().collect()
+        self.namespaces
+            .read()
+            .expect("namespace store lock poisoned")
+            .iter()
+            .cloned()
+            .collect()
     }
 }
 
@@ -150,12 +161,12 @@ impl Provision {
 
     /// Check if the handler is ready.
     pub fn is_ready(&self) -> bool {
-        *self.ready.read().unwrap()
+        *self.ready.read().expect("ready state lock poisoned")
     }
 
     /// Set the ready state.
     pub fn set_ready(&self, ready: bool) {
-        *self.ready.write().unwrap() = ready;
+        *self.ready.write().expect("ready state lock poisoned") = ready;
     }
 }
 

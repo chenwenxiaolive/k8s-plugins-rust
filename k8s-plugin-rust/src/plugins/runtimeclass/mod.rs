@@ -184,19 +184,19 @@ impl InMemoryRuntimeClassStore {
     }
 
     pub fn add(&self, rc: RuntimeClass) {
-        self.classes.write().unwrap().insert(rc.name.clone(), rc);
+        self.classes.write().expect("runtime class store lock poisoned").insert(rc.name.clone(), rc);
     }
 }
 
 impl RuntimeClassLister for InMemoryRuntimeClassStore {
     fn get(&self, name: &str) -> Option<RuntimeClass> {
-        self.classes.read().unwrap().get(name).cloned()
+        self.classes.read().expect("runtime class store lock poisoned").get(name).cloned()
     }
 }
 
 impl RuntimeClassClient for InMemoryRuntimeClassStore {
     fn get(&self, name: &str) -> Result<Option<RuntimeClass>, String> {
-        Ok(self.classes.read().unwrap().get(name).cloned())
+        Ok(self.classes.read().expect("runtime class store lock poisoned").get(name).cloned())
     }
 }
 

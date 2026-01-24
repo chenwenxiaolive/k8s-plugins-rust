@@ -144,7 +144,7 @@ impl InMemoryIngressClassLister {
     }
 
     pub fn add_class(&self, class: IngressClass) {
-        let mut classes = self.classes.write().unwrap();
+        let mut classes = self.classes.write().expect("ingress class lock poisoned");
         classes.push(class);
     }
 }
@@ -157,7 +157,7 @@ impl Default for InMemoryIngressClassLister {
 
 impl IngressClassLister for InMemoryIngressClassLister {
     fn list(&self) -> Vec<IngressClass> {
-        let classes = self.classes.read().unwrap();
+        let classes = self.classes.read().expect("ingress class lock poisoned");
         classes.clone()
     }
 }

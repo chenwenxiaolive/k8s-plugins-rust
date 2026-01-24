@@ -68,14 +68,18 @@ impl InMemoryNamespaceStore {
     pub fn add(&self, info: NamespaceInfo) {
         self.namespaces
             .write()
-            .unwrap()
+            .expect("namespace store lock poisoned")
             .insert(info.name.clone(), info);
     }
 }
 
 impl NamespaceLister for InMemoryNamespaceStore {
     fn get(&self, name: &str) -> Option<NamespaceInfo> {
-        self.namespaces.read().unwrap().get(name).cloned()
+        self.namespaces
+            .read()
+            .expect("namespace store lock poisoned")
+            .get(name)
+            .cloned()
     }
 }
 

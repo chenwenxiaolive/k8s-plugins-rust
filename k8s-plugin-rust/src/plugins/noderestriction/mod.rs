@@ -339,14 +339,21 @@ impl InMemoryPodStore {
 
     pub fn add(&self, pod: Pod) {
         let key = format!("{}/{}", pod.namespace, pod.name);
-        self.pods.write().unwrap().insert(key, pod);
+        self.pods
+            .write()
+            .expect("pod store lock poisoned")
+            .insert(key, pod);
     }
 }
 
 impl PodStore for InMemoryPodStore {
     fn get(&self, namespace: &str, name: &str) -> Option<Pod> {
         let key = format!("{}/{}", namespace, name);
-        self.pods.read().unwrap().get(&key).cloned()
+        self.pods
+            .read()
+            .expect("pod store lock poisoned")
+            .get(&key)
+            .cloned()
     }
 }
 
@@ -360,13 +367,20 @@ impl InMemoryNodeStore {
     pub fn new() -> Self { Self::default() }
 
     pub fn add(&self, node: Node) {
-        self.nodes.write().unwrap().insert(node.name.clone(), node);
+        self.nodes
+            .write()
+            .expect("node store lock poisoned")
+            .insert(node.name.clone(), node);
     }
 }
 
 impl NodeStore for InMemoryNodeStore {
     fn get(&self, name: &str) -> Option<Node> {
-        self.nodes.read().unwrap().get(name).cloned()
+        self.nodes
+            .read()
+            .expect("node store lock poisoned")
+            .get(name)
+            .cloned()
     }
 }
 

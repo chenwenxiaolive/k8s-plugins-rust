@@ -338,7 +338,10 @@ impl SyncRateLimiter {
 
 impl RateLimiter for SyncRateLimiter {
     fn try_accept(&self) -> bool {
-        self.inner.lock().unwrap().try_accept()
+        self.inner
+            .lock()
+            .expect("rate limiter lock poisoned")
+            .try_accept()
     }
 }
 
@@ -409,7 +412,7 @@ impl LruCache {
 
     /// Get the next order value.
     fn next_order(&self) -> u64 {
-        let mut counter = self.counter.lock().unwrap();
+        let mut counter = self.counter.lock().expect("counter lock poisoned");
         *counter += 1;
         *counter
     }
@@ -436,7 +439,7 @@ impl Cache for LruCache {
     fn get(&self, key: &str) -> Arc<dyn RateLimiter> {
         // Try to get existing entry
         {
-            let mut cache = self.cache.write().unwrap();
+            let mut cache = self.cache.write().expect("cache lock poisoned");
             if let Some(entry) = cache.get_mut(key) {
                 entry.order = self.next_order();
                 return Arc::clone(&entry.rate_limiter);
@@ -448,7 +451,7 @@ impl Cache for LruCache {
             Arc::new(SyncRateLimiter::new(self.qps, self.burst, Arc::clone(&self.clock)));
         let order = self.next_order();
 
-        let mut cache = self.cache.write().unwrap();
+        let mut cache = self.cache.write().expect("cache lock poisoned");
 
         // Check again in case another thread added it
         if let Some(entry) = cache.get(key) {

@@ -114,7 +114,7 @@ impl InMemoryLimitRangeStore {
     }
 
     pub fn add(&self, range: LimitRange) {
-        let mut ranges = self.ranges.write().unwrap();
+        let mut ranges = self.ranges.write().expect("limit range store lock poisoned");
         ranges
             .entry(range.namespace.clone())
             .or_default()
@@ -126,7 +126,7 @@ impl LimitRangeLister for InMemoryLimitRangeStore {
     fn list(&self, namespace: &str) -> Vec<LimitRange> {
         self.ranges
             .read()
-            .unwrap()
+            .expect("limit range store lock poisoned")
             .get(namespace)
             .cloned()
             .unwrap_or_default()

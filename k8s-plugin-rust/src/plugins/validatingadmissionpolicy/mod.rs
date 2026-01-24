@@ -749,33 +749,53 @@ impl InMemoryPolicyStore {
     }
 
     pub fn add_policy(&self, policy: ValidatingAdmissionPolicy) {
-        self.policies.write().unwrap().insert(policy.name.clone(), policy);
+        self.policies
+            .write()
+            .expect("policy store lock poisoned")
+            .insert(policy.name.clone(), policy);
     }
 
     pub fn add_binding(&self, binding: ValidatingAdmissionPolicyBinding) {
-        self.bindings.write().unwrap().insert(binding.name.clone(), binding);
+        self.bindings
+            .write()
+            .expect("binding store lock poisoned")
+            .insert(binding.name.clone(), binding);
     }
 }
 
 impl PolicyLister for InMemoryPolicyStore {
     fn list_policies(&self) -> Vec<ValidatingAdmissionPolicy> {
-        self.policies.read().unwrap().values().cloned().collect()
+        self.policies
+            .read()
+            .expect("policy store lock poisoned")
+            .values()
+            .cloned()
+            .collect()
     }
 
     fn get_policy(&self, name: &str) -> Option<ValidatingAdmissionPolicy> {
-        self.policies.read().unwrap().get(name).cloned()
+        self.policies
+            .read()
+            .expect("policy store lock poisoned")
+            .get(name)
+            .cloned()
     }
 }
 
 impl BindingLister for InMemoryPolicyStore {
     fn list_bindings(&self) -> Vec<ValidatingAdmissionPolicyBinding> {
-        self.bindings.read().unwrap().values().cloned().collect()
+        self.bindings
+            .read()
+            .expect("binding store lock poisoned")
+            .values()
+            .cloned()
+            .collect()
     }
 
     fn get_bindings_for_policy(&self, policy_name: &str) -> Vec<ValidatingAdmissionPolicyBinding> {
         self.bindings
             .read()
-            .unwrap()
+            .expect("binding store lock poisoned")
             .values()
             .filter(|b| b.spec.policy_name == policy_name)
             .cloned()

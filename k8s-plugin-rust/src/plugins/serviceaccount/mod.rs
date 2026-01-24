@@ -303,7 +303,7 @@ impl InMemoryServiceAccountStore {
 
     pub fn add(&self, sa: ServiceAccount) {
         let key = format!("{}/{}", sa.namespace, sa.name);
-        let mut accounts = self.accounts.write().unwrap();
+        let mut accounts = self.accounts.write().expect("service account store lock poisoned");
         accounts.insert(key, sa);
     }
 }
@@ -317,7 +317,7 @@ impl Default for InMemoryServiceAccountStore {
 impl ServiceAccountStore for InMemoryServiceAccountStore {
     fn get(&self, namespace: &str, name: &str) -> Option<ServiceAccount> {
         let key = format!("{}/{}", namespace, name);
-        let accounts = self.accounts.read().unwrap();
+        let accounts = self.accounts.read().expect("service account store lock poisoned");
         accounts.get(&key).cloned()
     }
 }

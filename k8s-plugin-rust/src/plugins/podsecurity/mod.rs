@@ -272,7 +272,7 @@ impl InMemoryNamespaceLabelSource {
     }
 
     pub fn add_namespace(&self, name: &str, labels: HashMap<String, String>) {
-        let mut ns = self.namespaces.write().unwrap();
+        let mut ns = self.namespaces.write().expect("namespace label source lock poisoned");
         ns.insert(name.to_string(), labels);
     }
 }
@@ -285,7 +285,7 @@ impl Default for InMemoryNamespaceLabelSource {
 
 impl NamespaceLabelSource for InMemoryNamespaceLabelSource {
     fn get_labels(&self, namespace: &str) -> Option<HashMap<String, String>> {
-        let ns = self.namespaces.read().unwrap();
+        let ns = self.namespaces.read().expect("namespace label source lock poisoned");
         ns.get(namespace).cloned()
     }
 }

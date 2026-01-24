@@ -70,18 +70,27 @@ impl InMemoryNamespaceLister {
 
     /// Add a namespace.
     pub fn add(&self, name: &str) {
-        self.namespaces.write().unwrap().insert(name.to_string());
+        self.namespaces
+            .write()
+            .expect("namespace store lock poisoned")
+            .insert(name.to_string());
     }
 
     /// Remove a namespace.
     pub fn remove(&self, name: &str) {
-        self.namespaces.write().unwrap().remove(name);
+        self.namespaces
+            .write()
+            .expect("namespace store lock poisoned")
+            .remove(name);
     }
 }
 
 impl NamespaceLister for InMemoryNamespaceLister {
     fn exists(&self, name: &str) -> bool {
-        self.namespaces.read().unwrap().contains(name)
+        self.namespaces
+            .read()
+            .expect("namespace store lock poisoned")
+            .contains(name)
     }
 
     fn get(&self, name: &str) -> Result<(), AdmissionError> {
@@ -124,17 +133,17 @@ impl Exists {
     /// Set the namespace lister.
     pub fn set_namespace_lister(&mut self, lister: Arc<dyn NamespaceLister>) {
         self.namespace_lister = Some(lister);
-        *self.ready.write().unwrap() = true;
+        *self.ready.write().expect("ready state lock poisoned") = true;
     }
 
     /// Check if the handler is ready.
     pub fn is_ready(&self) -> bool {
-        *self.ready.read().unwrap()
+        *self.ready.read().expect("ready state lock poisoned")
     }
 
     /// Set the ready state.
     pub fn set_ready(&self, ready: bool) {
-        *self.ready.write().unwrap() = ready;
+        *self.ready.write().expect("ready state lock poisoned") = ready;
     }
 }
 

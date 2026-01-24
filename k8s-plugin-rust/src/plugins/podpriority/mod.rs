@@ -111,17 +111,29 @@ impl InMemoryPriorityClassStore {
     }
 
     pub fn add(&self, pc: PriorityClass) {
-        self.classes.write().unwrap().insert(pc.name.clone(), pc);
+        self.classes
+            .write()
+            .expect("priority class store lock poisoned")
+            .insert(pc.name.clone(), pc);
     }
 }
 
 impl PriorityClassLister for InMemoryPriorityClassStore {
     fn get(&self, name: &str) -> Option<PriorityClass> {
-        self.classes.read().unwrap().get(name).cloned()
+        self.classes
+            .read()
+            .expect("priority class store lock poisoned")
+            .get(name)
+            .cloned()
     }
 
     fn list(&self) -> Vec<PriorityClass> {
-        self.classes.read().unwrap().values().cloned().collect()
+        self.classes
+            .read()
+            .expect("priority class store lock poisoned")
+            .values()
+            .cloned()
+            .collect()
     }
 }
 
